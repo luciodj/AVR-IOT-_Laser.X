@@ -85,8 +85,10 @@ void receivedFromCloud(uint8_t *topic, uint8_t *payload)
 //	debug_printer(SEVERITY_NONE, LEVEL_NORMAL, "topic: %s", topic);
 	debug_printer(SEVERITY_NONE, LEVEL_NORMAL, "payload: %s", payload);
     int pan, tilt, fire;
-    if (JSON_getInt(payload, "pan", &pan) && JSON_getInt(payload, "tilt", &tilt)) {
+    if (JSON_getInt(payload, "pan", &pan)) {
         SERVO_set(1, pan -7 );
+    }
+    if (JSON_getInt(payload, "tilt", &tilt)) {
         SERVO_set(0, tilt -19);
     }
     PORTD_set_pin_dir(4, PORT_DIR_OUT);
