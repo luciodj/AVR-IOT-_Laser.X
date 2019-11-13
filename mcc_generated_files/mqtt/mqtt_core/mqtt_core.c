@@ -133,6 +133,9 @@ static mqttPublishPacket txPublishPacket;
 /** \brief SUBSCRIBE packet to be transmitted. */
 static mqttSubscribePacket txSubscribePacket;
 
+/** \brief UNSUBSCRIBE packet to be transmitted. */
+static mqttUnsubscribePacket txUnsubscribePacket;
+
 /** \brief CONNACK packet timeout indicator. */
 static volatile bool connackTimeoutOccured = false;
 
@@ -141,6 +144,12 @@ static volatile bool pingreqTimeoutOccured = false;
 
 /** \brief PINGRESP packet timeout indicator. */
 static volatile bool pingrespTimeoutOccured = false;
+
+/** \brief SUBACK packet timeout indicator. */
+static volatile bool subackTimeoutOccured = false;
+
+/** \brief SUBACK packet timeout indicator. */
+static volatile bool unsubackTimeoutOccured = false;
 
 /** \brief Store the timestamp at the last CONNACK. */
 time_t connectTime = 0;
@@ -231,6 +240,21 @@ transmission.
  */
 static bool mqttSendSubscribe(mqttContext *mqttConnectionPtr);
 
+
+/** \brief Send the MQTT UNSUBSCRIBE packet.
+ *
+ * This function sends the MQTT UNSUBSCRIBE packet using the underlying
+TCP layer.
+ *
+ * @param mqttConnectionPtr
+ *
+ * @return
+ *  - The return code indicating success/failure of UNSUBSCRIBE packet
+transmission.
+ */
+static bool mqttSendUnsubscribe(mqttContext *mqttConnectionPtr);
+
+
 /** \brief Send the MQTT PINGREQ packet.
  *
  * This function sends the MQTT PINGREQ packet using the underlying
@@ -293,6 +317,21 @@ packet was received and processed correctly.
  */
 static mqttCurrentState mqttProcessSuback(mqttContext *mqttConnectionPtr);
 
+
+/** \brief Process the MQTT UNSUBACK packet.
+ *
+ * This function processes the UNSUBACK packet received from the
+broker.
+ *
+ * @param mqttConnectionPtr
+ *
+ * @return
+ *  - The state of MQTT Tx and Rx handlers depending on whether the mqttProcessUnsuback
+packet was received and processed correctly.
+ */
+static mqttCurrentState mqttProcessUnsuback(mqttContext *mqttConnectionPtr);
+
+
 /** \brief Process the MQTT PUBLISH packet.
  *
  * This function processes the PUBLISH packet received from the
@@ -350,6 +389,47 @@ static absolutetime_t checkPingrespTimeoutState();
 timerstruct_t pingrespTimer = {checkPingrespTimeoutState, NULL};
 	
 
+/** \brief Check whether timeout has occurred after sending SUBSCRIBE
+packet.
+ *
+ * This function checks whether a timeout (30s) has occurred after sending
+SUBSCRIBE packet. In the current MQTT client implementation, the client
+waits for 30s after transmission of SUBSCRIBE packet to receive a SUBACK
+packet.
+* If the client does not receive a SUBACK packet from the server in a 
+reasonable period of time (currently set to 30s), it is treated as a 
+protocol violation. The client therefore will close the Network 
+Connection by checking subackTimeoutOccured flag (MQTT RFC, section 4.8).
+ *
+ * @param none
+ *
+ * @return
+ *  - The number of ticks till the suback expires.
+ */
+static absolutetime_t checkSubackTimeoutState();
+timerstruct_t subackTimer = {checkSubackTimeoutState, NULL};
+	
+
+/** \brief Check whether timeout has occurred after sending UNSUBSCRIBE
+packet.
+ *
+ * This function checks whether a timeout (30s) has occurred after sending
+UNSUBSCRIBE packet. In the current MQTT client implementation, the client
+waits for 30s after transmission of UNSUBSCRIBE packet to receive a UNSUBACK
+packet.
+* If the client does not receive a UNSUBACK packet from the server in a 
+reasonable period of time (currently set to 30s), it is treated as a 
+protocol violation. The client therefore will close the Network 
+Connection by checking unsubackTimeoutOccured flag (MQTT RFC, section 4.8).
+ *
+ * @param none
+ *
+ * @return
+ *  - The number of ticks till the unsuback expires.
+ */
+static absolutetime_t checkUnsubackTimeoutState();
+timerstruct_t unsubackTimer = {checkUnsubackTimeoutState, NULL};
+	
 /**********************Local function definitions*(END)************************/
 
 /**********************Function implementations********************************/
@@ -375,6 +455,21 @@ static absolutetime_t checkPingrespTimeoutState() {
    pingrespTimeoutOccured = true; // Mark that timer has executed
    return (WAITFORPINGRESP_TIMEOUT);
 }
+
+
+static absolutetime_t checkSubackTimeoutState() 
+{
+	subackTimeoutOccured = true; // Mark that timer has executed
+	return 0; // Stop the timer
+}
+
+
+static absolutetime_t checkUnsubackTimeoutState()
+{
+	unsubackTimeoutOccured = true; // Mark that timer has executed
+	return 0; // Stop the timer
+}
+
 
 void MQTT_initialiseState(void){
 	mqttState = DISCONNECTED;
@@ -483,12 +578,17 @@ bool MQTT_CreatePublishPacket(mqttPublishPacket *newPublishPacket) {
 
 bool MQTT_CreateSubscribePacket(mqttSubscribePacket *newSubscribePacket) {
    bool ret;
+   uint8_t topicCount = 0;
+
    ret = false;
 
-   memset(&txSubscribePacket, 0, sizeof (txSubscribePacket));
+    // The library is capable of handling only one SUBSCRIBE request at a time.
+    // A new SUBSCRIBE packet can be created only after reception of SUBACK for
+    // the previous SUBSCRIBE packet has been received. This condition is
+    // checked by checking the value of newRxSubackPacket flag.
+    if (mqttState == CONNECTED && mqttRxFlags.newRxSubackPacket == 0) {
+      memset(&txSubscribePacket, 0, sizeof (txSubscribePacket));
 
-   // TODO: Check that there is a topic/payload...
-   if (mqttState == CONNECTED) {
       // Fixed header
       // MQTT-3.8.1-1: Bits 3,2,1,0 of fixed header MUST be set as 0010, else Server MUST treat as malformed
       txSubscribePacket.subscribeHeaderFlags.controlPacketType = SUBSCRIBE;
@@ -501,7 +601,7 @@ bool MQTT_CreateSubscribePacket(mqttSubscribePacket *newSubscribePacket) {
       txSubscribePacket.packetIdentifierMSB = newSubscribePacket->packetIdentifierMSB;
 
       // Payload
-      for (uint8_t topicCount = 0; topicCount < NUM_TOPICS_SUBSCRIBE; topicCount++) {
+      for (topicCount = 0; topicCount < NUM_TOPICS_SUBSCRIBE; topicCount++) {
          txSubscribePacket.subscribePayload[topicCount].topicLength = htons(newSubscribePacket->subscribePayload[topicCount].topicLength);
          txSubscribePacket.subscribePayload[topicCount].topic = newSubscribePacket->subscribePayload[topicCount].topic;
          txSubscribePacket.subscribePayload[topicCount].requestedQoS = newSubscribePacket->subscribePayload[topicCount].requestedQoS;
@@ -518,6 +618,52 @@ bool MQTT_CreateSubscribePacket(mqttSubscribePacket *newSubscribePacket) {
    }
    return ret;
 }
+
+
+bool MQTT_CreateUnsubscribePacket(mqttUnsubscribePacket *newUnsubscribePacket) 
+{
+    bool ret;
+	uint8_t topicCount = 0;
+
+	ret = false;
+	
+	// The library is capable of handling only one UNSUBSCRIBE request at a time.
+	// A new UNSUBSCRIBE packet can be created only after reception of UNSUBACK for
+	// the previous UNSUBSCRIBE packet has been received. This condition is
+	// checked by checking the value of newRxUnubackPacket flag.
+	if (mqttState == CONNECTED && mqttRxFlags.newRxUnsubackPacket == 0) 
+    {
+        memset(&txUnsubscribePacket, 0, sizeof (txUnsubscribePacket));
+
+		// Fixed header
+		// MQTT-3.8.1-1: Bits 3,2,1,0 of fixed header MUST be set as 0010, else Server MUST treat as malformed
+		txUnsubscribePacket.unsubscribeHeaderFlags.controlPacketType = UNSUBSCRIBE;
+		txUnsubscribePacket.unsubscribeHeaderFlags.duplicate = 0;
+		txUnsubscribePacket.unsubscribeHeaderFlags.qos = 1;
+		txUnsubscribePacket.unsubscribeHeaderFlags.retain = 0;
+
+		// Variable header
+		txUnsubscribePacket.packetIdentifierLSB = newUnsubscribePacket->packetIdentifierLSB;
+		txUnsubscribePacket.packetIdentifierMSB = newUnsubscribePacket->packetIdentifierMSB;
+
+		// Payload
+		for (topicCount = 0; topicCount < NUM_TOPICS_UNSUBSCRIBE; topicCount++) 
+		{
+			txUnsubscribePacket.unsubscribePayload[topicCount].topicLength = htons(newUnsubscribePacket->unsubscribePayload[topicCount].topicLength);
+			txUnsubscribePacket.unsubscribePayload[topicCount].topic = newUnsubscribePacket->unsubscribePayload[topicCount].topic;
+			txUnsubscribePacket.totalLength += sizeof (txUnsubscribePacket.unsubscribePayload[topicCount].topicLength) + ntohs(txUnsubscribePacket.unsubscribePayload[topicCount].topicLength);
+		}
+
+		// The totalLength field is not essentially a part of the UNSUBSCRIBE
+		// packet. It is used for calculation of the remaining length field.
+		txUnsubscribePacket.totalLength += sizeof (txUnsubscribePacket.packetIdentifierLSB) + sizeof (txUnsubscribePacket.packetIdentifierMSB);
+
+		mqttTxFlags.newTxUnsubscribePacket = 1;
+		ret = true;
+	}
+	return ret;
+}
+
 
 static bool mqttSendConnect(mqttContext *mqttConnectionPtr) {
    bool ret = false;
@@ -538,9 +684,8 @@ static bool mqttSendConnect(mqttContext *mqttConnectionPtr) {
       MQTT_ExchangeBufferWrite(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff, (uint8_t*) txConnectPacket.password, ntohs(txConnectPacket.passwordLength));
    }
 
-   if (mqttTxFlags.newTxConnectPacket == 1) {
-      ret = MQTT_Send(mqttConnectionPtr);
-   }
+   ret = MQTT_Send(mqttConnectionPtr);
+   
    if (ret == true) {
       mqttTxFlags.newTxConnectPacket = 0;
    } else {
@@ -647,6 +792,8 @@ static void mqttProcessPingresp(mqttContext *mqttConnectionPtr) {
 static mqttCurrentState mqttProcessSuback(mqttContext *mqttConnectionPtr) {
    mqttCurrentState ret;
    mqttSubackPacket rxSubackPacket;
+   uint8_t topicNumbers = 0;
+   uint8_t topicCount = 0;
 
    memset(&rxSubackPacket, 0, sizeof (rxSubackPacket));
 
@@ -668,8 +815,8 @@ static mqttCurrentState mqttProcessSuback(mqttContext *mqttConnectionPtr) {
       MQTT_ExchangeBufferRead(&mqttConnectionPtr->mqttDataExchangeBuffers.rxbuff, rxSubackPacket.returnCode, 1);
       // ToDo This calculation needs to be modified after removing
       // hardcoding
-      uint8_t topicNumbers = (sizeof (rxSubackPacket.returnCode) / sizeof (rxSubackPacket.returnCode[0]));
-      for (uint8_t topicCount = 0; topicCount < topicNumbers; topicCount++) {
+      topicNumbers = (sizeof (rxSubackPacket.returnCode) / sizeof (rxSubackPacket.returnCode[0]));
+      for (topicCount = 0; topicCount < topicNumbers; topicCount++) {
          if (rxSubackPacket.returnCode[topicCount] == SUBSCRIBE_FAILURE) {
             // Change state appropriately
             ret = DISCONNECTED;
@@ -694,11 +841,51 @@ static mqttCurrentState mqttProcessSuback(mqttContext *mqttConnectionPtr) {
    return ret;
 }
 
+static mqttCurrentState mqttProcessUnsuback(mqttContext *mqttConnectionPtr) 
+{
+	mqttCurrentState ret;
+	mqttUnsubackPacket rxUnsubackPacket;
+
+	memset(&rxUnsubackPacket, 0, sizeof (rxUnsubackPacket));
+	
+	ret = CONNECTED;
+
+	MQTT_ExchangeBufferRead(&mqttConnectionPtr->mqttDataExchangeBuffers.rxbuff, &rxUnsubackPacket.unsubAckHeaderFlags.All, sizeof (rxUnsubackPacket.unsubAckHeaderFlags.All));
+	MQTT_ExchangeBufferRead(&mqttConnectionPtr->mqttDataExchangeBuffers.rxbuff, &rxUnsubackPacket.remainingLength, sizeof (rxUnsubackPacket.remainingLength));
+	if(rxUnsubackPacket.remainingLength != 2)
+	{
+		// The length of the variable header for UNSUBACK Packet has to be 2 
+        // according to MQTT RFC, section 3.11.1.
+		ret = DISCONNECTED;
+	}
+    else
+    {	
+        MQTT_ExchangeBufferRead(&mqttConnectionPtr->mqttDataExchangeBuffers.rxbuff, &rxUnsubackPacket.packetIdentifierMSB, sizeof (rxUnsubackPacket.packetIdentifierMSB));
+        MQTT_ExchangeBufferRead(&mqttConnectionPtr->mqttDataExchangeBuffers.rxbuff, &rxUnsubackPacket.packetIdentifierLSB, sizeof (rxUnsubackPacket.packetIdentifierLSB));
+        // The packetIdentifier of the UNSUBACK packet must match the
+        // packetIdentifier of the UNSUBSCRIBE packet. Since the library allows
+        // the application to create only one UNSUBSCRIBE packet at a time,
+        // checking this condition becomes simple.
+        if ((rxUnsubackPacket.packetIdentifierLSB != txUnsubscribePacket.packetIdentifierLSB) || (rxUnsubackPacket.packetIdentifierMSB != txUnsubscribePacket.packetIdentifierMSB)) 
+        {
+            // Change state appropriately
+            ret = DISCONNECTED;
+        } 
+    }
+    
+	mqttRxFlags.newRxUnsubackPacket = 0;
+	// Re-initialize the RX exchange buffer to be able to process the
+	// next incoming MQTT packet
+	MQTT_ExchangeBufferInit(&mqttConnectionPtr->mqttDataExchangeBuffers.rxbuff);
+	return ret;
+}
+
 static mqttCurrentState mqttProcessPublish(mqttContext *mqttConnectionPtr) {
    mqttCurrentState ret;
    uint32_t decodedLength;
    mqttPublishPacket rxPublishPacket;
    const publishReceptionHandler_t *publishRecvHandlerInfo;
+   uint8_t i;
 
    uint8_t mqttTopic[TOPIC_SIZE];
    uint8_t mqttPayload[PAYLOAD_SIZE];
@@ -712,7 +899,7 @@ static mqttCurrentState mqttProcessPublish(mqttContext *mqttConnectionPtr) {
    // Fixed header
    MQTT_ExchangeBufferRead(&mqttConnectionPtr->mqttDataExchangeBuffers.rxbuff, &rxPublishPacket.publishHeaderFlags.All, sizeof (rxPublishPacket.publishHeaderFlags.All));
    MQTT_ExchangeBufferRead(&mqttConnectionPtr->mqttDataExchangeBuffers.rxbuff, &rxPublishPacket.remainingLength[0], sizeof (rxPublishPacket.remainingLength[0]));
-   for (uint8_t i = 2; rxPublishPacket.remainingLength[i - 1] & 0x80 && i < sizeof (rxPublishPacket.remainingLength); i++) {
+   for (i = 2; rxPublishPacket.remainingLength[i - 1] & 0x80 && i < sizeof (rxPublishPacket.remainingLength); i++) {
       MQTT_ExchangeBufferRead(&mqttConnectionPtr->mqttDataExchangeBuffers.rxbuff, &rxPublishPacket.remainingLength[i], 1);
    }
    decodedLength = mqttDecodeLength(&rxPublishPacket.remainingLength[0]);
@@ -730,7 +917,7 @@ static mqttCurrentState mqttProcessPublish(mqttContext *mqttConnectionPtr) {
 
    // Send payload information to the application
    publishRecvHandlerInfo = MQTT_GetPublishReceptionHandlerTable();
-   for (uint8_t i = 0; i < NUM_TOPICS_SUBSCRIBE; i++) {
+   for (i = 0; i < NUM_TOPICS_SUBSCRIBE; i++) {
       if (publishRecvHandlerInfo) {
          if (memcmp((void*) publishRecvHandlerInfo->topic, (void*) rxPublishPacket.topic, ntohs(rxPublishPacket.topicLength)) == 0) {
             publishRecvHandlerInfo->mqttHandlePublishDataCallBack(rxPublishPacket.topic, rxPublishPacket.payload);
@@ -799,19 +986,28 @@ mqttCurrentState MQTT_TransmissionHandler(mqttContext *mqttConnectionPtr) {
                   timeout_delete(&pingreqTimer);
                   packetSent = mqttSendPublish(mqttConnectionPtr);
 
-                  if (packetSent == true) {
                      keepAliveTimeout = ntohs(txConnectPacket.connectVariableHeader.keepAliveTimer);
                      if (txConnectPacket.connectVariableHeader.keepAliveTimer > 0) {
                         timeout_create(&pingreqTimer, ((keepAliveTimeout - KEEP_ALIVE_CALCULATION_CONSTANT) * SECONDS));
                      }
-                  } else {
-                     mqttState = DISCONNECTED;
-                  }
                   break;
                case SENDSUBSCRIBE:
+				  timeout_delete(&pingreqTimer);
                   mqttSendSubscribe(mqttConnectionPtr);
                   keepAliveTimeout = ntohs(txConnectPacket.connectVariableHeader.keepAliveTimer);
-                  timeout_create(&pingreqTimer, ((keepAliveTimeout - KEEP_ALIVE_CALCULATION_CONSTANT) * SECONDS));
+				  if (txConnectPacket.connectVariableHeader.keepAliveTimer > 0)
+				  {
+                    timeout_create(&pingreqTimer, ((keepAliveTimeout - KEEP_ALIVE_CALCULATION_CONSTANT) * SECONDS));
+				  }
+                  break;
+               case SENDUNSUBSCRIBE:
+			      timeout_delete(&pingreqTimer);
+                  mqttSendUnsubscribe(mqttConnectionPtr);
+                  keepAliveTimeout = ntohs(txConnectPacket.connectVariableHeader.keepAliveTimer);
+                  if (txConnectPacket.connectVariableHeader.keepAliveTimer > 0)
+				  {
+                    timeout_create(&pingreqTimer, ((keepAliveTimeout - KEEP_ALIVE_CALCULATION_CONSTANT) * SECONDS));
+				  }
                   break;
                default:
                   break;
@@ -832,6 +1028,15 @@ mqttCurrentState MQTT_ReceptionHandler(mqttContext *mqttConnectionPtr) {
    keepAliveTimeout = 0;
    receivedPacketHeader.All = 0;
 
+   if(pingrespTimeoutOccured == true || subackTimeoutOccured == true || unsubackTimeoutOccured == true)
+   {
+	  // This implies that expected response has not been received from  
+	  // the server in a reasonable period of time (currently set to 30s).
+	  // This is treated as a protocol violation. The client therefore
+	  // will close the Network Connection (MQTT RFC, section 4.8).
+	  mqttState = DISCONNECTED;
+      MQTT_Close(mqttConnectionPtr);
+   }
    // If nothing to process
    if (mqttConnectionPtr->mqttDataExchangeBuffers.rxbuff.dataLength == 0)
       return mqttState;
@@ -888,17 +1093,22 @@ mqttCurrentState MQTT_ReceptionHandler(mqttContext *mqttConnectionPtr) {
                if ((mqttRxFlags.newRxPingrespPacket == 1) && (pingrespTimeoutOccured == false)) {
                   timeout_delete(&pingrespTimer);
                   mqttProcessPingresp(mqttConnectionPtr);
-               } else {
-                  mqttState = SENDDISCONNECT;
                }
                break;
             case SUBACK:
                // SUBACK received
-               if ((mqttRxFlags.newRxSubackPacket == 1)) {
+               if ((mqttRxFlags.newRxSubackPacket == 1) && (subackTimeoutOccured == false)) {
+	              timeout_delete(&subackTimer);
                   mqttState = mqttProcessSuback(mqttConnectionPtr);
-               } else {
-                  mqttState = SENDDISCONNECT;
                }
+               break;
+               case UNSUBACK:
+               // UNSUBACK received
+               if ((mqttRxFlags.newRxUnsubackPacket == 1) && (unsubackTimeoutOccured == false)) 
+			   {
+				   timeout_delete(&unsubackTimer);
+	               mqttState = mqttProcessUnsuback(mqttConnectionPtr);
+	           } 
                break;
             case PUBLISH:
                // PUBLISH received
@@ -924,9 +1134,9 @@ mqttCurrentState MQTT_ReceptionHandler(mqttContext *mqttConnectionPtr) {
 }
 
 
-
 static bool mqttSendSubscribe(mqttContext *mqttConnectionPtr) {
    bool ret = false;
+   uint8_t topicCount = 0;
 
    MQTT_ExchangeBufferInit(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff);
    MQTT_ExchangeBufferInit(&mqttConnectionPtr->mqttDataExchangeBuffers.rxbuff);
@@ -937,21 +1147,62 @@ static bool mqttSendSubscribe(mqttContext *mqttConnectionPtr) {
    MQTT_ExchangeBufferWrite(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff, &txSubscribePacket.packetIdentifierMSB, sizeof (txSubscribePacket.packetIdentifierMSB));
    MQTT_ExchangeBufferWrite(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff, &txSubscribePacket.packetIdentifierLSB, sizeof (txSubscribePacket.packetIdentifierLSB));
 
-   for (uint8_t topicCount = 0; topicCount < NUM_TOPICS_SUBSCRIBE; topicCount++) {
+   for (topicCount = 0; topicCount < NUM_TOPICS_SUBSCRIBE; topicCount++) {
       MQTT_ExchangeBufferWrite(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff, (uint8_t*) & txSubscribePacket.subscribePayload[topicCount].topicLength, sizeof (txSubscribePacket.subscribePayload[topicCount].topicLength));
       MQTT_ExchangeBufferWrite(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff, txSubscribePacket.subscribePayload[topicCount].topic, ntohs(txSubscribePacket.subscribePayload[topicCount].topicLength));
       MQTT_ExchangeBufferWrite(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff, &txSubscribePacket.subscribePayload[topicCount].requestedQoS, sizeof (txSubscribePacket.subscribePayload[topicCount].requestedQoS));
    }
-
-   if (mqttTxFlags.newTxSubscribePacket == 1) {
-      ret = MQTT_Send(mqttConnectionPtr);
-      if (ret == true) {
-         mqttTxFlags.newTxSubscribePacket = 0;
-         mqttRxFlags.newRxSubackPacket = 1;
-      }
+   
+   ret = MQTT_Send(mqttConnectionPtr);
+   if (ret == true) {
+       mqttTxFlags.newTxSubscribePacket = 0;
+       mqttRxFlags.newRxSubackPacket = 1;
+	   
+	   //The timeout API names are different in MCC foundation
+	   //services timeout driver and START timeout driver
+	   subackTimeoutOccured = false;
+	   timeout_create(&subackTimer, (WAITFORSUBACK_TIMEOUT));
    }
+   
    return ret;
 }
+
+
+static bool mqttSendUnsubscribe(mqttContext *mqttConnectionPtr) 
+{
+    bool ret = false;
+	uint8_t topicCount = 0;
+    
+    MQTT_ExchangeBufferInit(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff);
+    MQTT_ExchangeBufferInit(&mqttConnectionPtr->mqttDataExchangeBuffers.rxbuff);
+    
+    // Copy the txUnsubscribePacket data in TCP Tx buffer
+    MQTT_ExchangeBufferWrite(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff, &txUnsubscribePacket.unsubscribeHeaderFlags.All, sizeof(txUnsubscribePacket.unsubscribeHeaderFlags.All));
+    MQTT_ExchangeBufferWrite(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff, txUnsubscribePacket.remainingLength, mqttEncodeLength(txUnsubscribePacket.totalLength, txUnsubscribePacket.remainingLength));
+    MQTT_ExchangeBufferWrite(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff, &txUnsubscribePacket.packetIdentifierMSB, sizeof(txUnsubscribePacket.packetIdentifierMSB));
+    MQTT_ExchangeBufferWrite(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff, &txUnsubscribePacket.packetIdentifierLSB, sizeof(txUnsubscribePacket.packetIdentifierLSB));
+    
+    for (topicCount = 0; topicCount < NUM_TOPICS_UNSUBSCRIBE; topicCount++) 
+    {
+        MQTT_ExchangeBufferWrite(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff, (uint8_t*)&txUnsubscribePacket.unsubscribePayload[topicCount].topicLength, sizeof(txUnsubscribePacket.unsubscribePayload[topicCount].topicLength));
+        MQTT_ExchangeBufferWrite(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff, txUnsubscribePacket.unsubscribePayload[topicCount].topic, ntohs(txUnsubscribePacket.unsubscribePayload[topicCount].topicLength));
+    }
+    
+        ret = MQTT_Send(mqttConnectionPtr);
+        if (ret == true) 
+        {
+            mqttTxFlags.newTxUnsubscribePacket = 0;
+            mqttRxFlags.newRxUnsubackPacket = 1;
+
+        //The timeout API names are different in MCC foundation
+        //services timeout driver and START timeout driver
+        unsubackTimeoutOccured = false;
+        timeout_create(&unsubackTimer, (WAITFORUNSUBACK_TIMEOUT));
+        }
+    
+    return ret;
+}
+
 
 static bool mqttSendPingreq(mqttContext *mqttConnectionPtr) {
    bool ret;
@@ -972,20 +1223,19 @@ static bool mqttSendPingreq(mqttContext *mqttConnectionPtr) {
    MQTT_ExchangeBufferWrite(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff, &txPingreqPacket.pingFixedHeader.All, sizeof (txPingreqPacket.pingFixedHeader.All));
    MQTT_ExchangeBufferWrite(&mqttConnectionPtr->mqttDataExchangeBuffers.txbuff, &txPingreqPacket.remainingLength, sizeof (txPingreqPacket.remainingLength));
 
-   if (mqttTxFlags.newTxPingreqPacket == 1) {
-      ret = MQTT_Send(mqttConnectionPtr);
-      if (ret == true) {
-         mqttTxFlags.newTxPingreqPacket = 0;
-         // Expect a PINGRESP packet
-         mqttRxFlags.newRxPingrespPacket = 1;
-         // The client expects the server to send a PINGRESP within
-         // keepAliveTimer value.
-
-         //The timeout API names are different in MCC foundation
-         //services timeout driver and START timeout driver
-         timeout_create(&pingrespTimer, (WAITFORPINGRESP_TIMEOUT));
-      }
+   ret = MQTT_Send(mqttConnectionPtr);
+   if (ret == true) {
+       mqttTxFlags.newTxPingreqPacket = 0;
+       // Expect a PINGRESP packet
+       mqttRxFlags.newRxPingrespPacket = 1;
+       // The client expects the server to send a PINGRESP within
+       // keepAliveTimer value.
+       
+       //The timeout API names are different in MCC foundation
+       //services timeout driver and START timeout driver
+       timeout_create(&pingrespTimer, (WAITFORPINGRESP_TIMEOUT));
    }
+   
    return ret;
 }
 

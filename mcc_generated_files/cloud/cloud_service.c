@@ -69,7 +69,7 @@ absolutetime_t CLOUD_task(void *param);
 absolutetime_t mqttTimeoutTask(void *payload);
 absolutetime_t cloudResetTask(void *payload);
 
-static void dnsHandler(uint8* domainName, uint32 serverIP);
+static void dnsHandler(uint8_t * domainName, uint32_t serverIP);
 static void updateJWT(uint32_t epoch);
 
 static int8_t connectMQTTSocket(void);
@@ -82,8 +82,9 @@ bool cloudResetTimerFlag = false;
 bool sendSubscribe = true;
 #define CLOUD_TASK_INTERVAL            500L
 #define CLOUD_MQTT_TIMEOUT_COUNT	      10000L  // 10 seconds max allowed to establish a connection
-#define MQTT_CONN_AGE_TIMEOUT 3600L               // 3600 seconds = 60minutes
-#define CLOUD_RESET_TIMEOUT  2000L                // 2 seconds
+#define MQTT_CONN_AGE_TIMEOUT          3600L   // 3600 seconds = 60minutes
+#define CLOUD_RESET_TIMEOUT            2000L   // 2 seconds
+
 
 // Create the timers for scheduler_timeout which runs these tasks
 timer_struct_t CLOUD_taskTimer            = {CLOUD_task};
@@ -119,7 +120,7 @@ absolutetime_t mqttTimeoutTask(void *payload) {
    CLOUD_reset();
 
    waitingForMQTT = false;
-    
+
    return 0;  
 }
 
@@ -156,13 +157,14 @@ static void connectMQTT()
 void CLOUD_subscribe(void)
 {
 	mqttSubscribePacket cloudSubscribePacket;
+	uint8_t topicCount = 0;
 
 	// Variable header
 	cloudSubscribePacket.packetIdentifierLSB = 1;
 	cloudSubscribePacket.packetIdentifierMSB = 0;
 
 	// Payload
-	for(uint8_t topicCount = 0; topicCount < NUM_TOPICS_SUBSCRIBE; topicCount++)
+	for(topicCount = 0; topicCount < NUM_TOPICS_SUBSCRIBE; topicCount++)
 	{
 		sprintf(mqttSubscribeTopic, "/devices/%s/config", deviceId);
 		cloudSubscribePacket.subscribePayload[topicCount].topic = (uint8_t *)mqttSubscribeTopic;
@@ -196,7 +198,7 @@ static int8_t connectMQTTSocket(void)
 {
    int8_t ret = false;
    
-   if (mqttGoogleApisComIP)
+   if (mqttGoogleApisComIP > 0)
    {
       struct bsd_sockaddr_in addr;
        
@@ -265,14 +267,14 @@ absolutetime_t CLOUD_task(void *param)
       }
    }
    
-   // If we have lost the AP we need to disconnect MQTT. TCP will still buffer but we know it will fail if no AP
-   if (!shared_networking_params.haveAPConnection)
+   // If we have lost the AP we need to get the mqttState to disconnected
+   if (shared_networking_params.haveAPConnection == 0)
    {
-      // This initiates a disconnection packet being sent, so it does not yet leave us disconnected!
+	  //Cleared on Access Point Connection
+	  shared_networking_params.haveERROR = 1;
       if (MQTT_GetConnectionState() == CONNECTED)
       {
-         MQTT_Disconnect(mqttConnnectionInfo);
-         shared_networking_params.haveERROR = 1;
+         MQTT_initialiseState();
       }
    }   
    else
@@ -389,6 +391,7 @@ static void updateJWT(uint32_t epoch)
    debug_printInfo("MQTT: cid=%s", cid);
    debug_printInfo("MQTT: mqttTopic=%s", mqttTopic);
    uint8_t res = CRYPTO_CLIENT_createJWT((char*)mqttPassword, PASSWORD_SPACE, epoch, projectId);
+
    time_t t = epoch - UNIX_OFFSET;
    debug_printInfo("JWT: Result(%d) at %s", res==0? 1 : -1, ctime(&t));
 }
@@ -401,8 +404,9 @@ static uint8_t reInit(void)
     shared_networking_params.haveAPConnection = 0;
     waitingForMQTT = false;
     isResetting = false;
-    
-    // Re-init the WiFi
+	uint8_t wifi_creds;
+		   	
+    //Re-init the WiFi
     wifi_reinit();
     
     registerSocketCallback(BSD_SocketHandler, dnsHandler);
@@ -414,22 +418,29 @@ static uint8_t reInit(void)
     cloud_packetReceiveCallBackTable[0].socket = MQTT_GetClientConnectionInfo()->tcpClientSocket;
     cloud_packetReceiveCallBackTable[0].recvCallBack = MQTT_CLIENT_receive;
 
-    int8_t e;
-    debug_print("CLOUD: credentials %s, %s,%s", ssid,pass,authType);
-    if(M2M_SUCCESS != (e=m2m_wifi_connect((char *)ssid, sizeof(ssid), atoi((char*)authType), (char *)pass, M2M_WIFI_CH_ALL)))
+    //When the input comes through cli/.cfg
+    if((strcmp(ssid,"") != 0) &&  (strcmp(authType,"") != 0))
     {
-        debug_printError("CLOUD: wifi error = %d",e);
-        shared_networking_params.haveERROR = 1;
-        return false;
+      wifi_creds = NEW_CREDENTIALS;
+      debug_printInfo("Connecting to AP with new credentials");
     }
-	else
-	{
-		scheduler_timeout_delete(&cloudResetTaskTimer);
-		debug_printInfo("CLOUD: Cloud reset timer is deleted");
-		scheduler_timeout_create(&mqttTimeoutTaskTimer, CLOUD_MQTT_TIMEOUT_COUNT);
-		cloudResetTimerFlag = false;
-		waitingForMQTT = true;		
-	}
+    //This works provided the board had connected to the AP successfully	
+    else 
+    {
+      wifi_creds = DEFAULT_CREDENTIALS;
+      debug_printInfo("Connecting to AP with the last used credentials");
+    }
+	
+    if(!wifi_connectToAp(wifi_creds))
+    {
+           return false;
+    }
+	
+    scheduler_timeout_delete(&cloudResetTaskTimer);
+    debug_printInfo("CLOUD: Cloud reset timer is deleted");
+    scheduler_timeout_create(&mqttTimeoutTaskTimer, CLOUD_MQTT_TIMEOUT_COUNT);
+    cloudResetTimerFlag = false;
+    waitingForMQTT = true;		
 
     return true;
 }

@@ -48,6 +48,8 @@
 
 #define WAITFORCONNACK_TIMEOUT              (30 * SECONDS)
 #define WAITFORPINGRESP_TIMEOUT             (30 * SECONDS)
+#define WAITFORSUBACK_TIMEOUT				(30 * SECONDS)
+#define WAITFORUNSUBACK_TIMEOUT				(30 * SECONDS)
 
 
 /*******************Timeout Driver for MQTT definitions*(END)******************/
@@ -319,12 +321,67 @@ typedef struct
 	subscribeAckReturnCode returnCode[NUM_TOPICS_SUBSCRIBE];
 } mqttSubackPacket;
 
+
+
+/** \brief MQTT UNSUBSCRIBE Payload format
+ *
+ * These are used by the application to handle the payload section of MQTT
+ * unsubscribe packet. 
+ */
+typedef struct
+{
+    // Topic name
+    uint16_t topicLength;
+    uint8_t *topic;
+} mqttUnsubscribePayload;
+
+
+/** \brief MQTT UNSUBSCRIBE packet
+ *
+ * This is used by the application to form and send an UNSUBSCRIBE packet. 
+ */
+typedef struct
+{
+    // Fixed header
+    mqttHeaderFlags unsubscribeHeaderFlags;
+    uint8_t remainingLength[4];
+    
+    // Variable header
+    uint8_t packetIdentifierLSB;
+    uint8_t packetIdentifierMSB;
+    
+    // Payload
+    // The payload of a UNSUBSCRIBE packet MUST contain at least one Topic Filter / QoS pair.
+    mqttUnsubscribePayload unsubscribePayload[NUM_TOPICS_UNSUBSCRIBE];
+	
+    uint16_t totalLength;
+} mqttUnsubscribePacket;
+
+
+/** \brief MQTT UNSUBACK packet
+ *
+ * This is used by the application to process a UNSUBACK packet. 
+ */
+typedef struct
+{
+	// Fixed header
+	mqttHeaderFlags unsubAckHeaderFlags;
+	uint8_t remainingLength;
+		
+	//variable header
+	uint8_t packetIdentifierMSB;
+	uint8_t packetIdentifierLSB;		
+		
+} mqttUnsubackPacket;
+
+
 /***********************MQTT Client definitions*(END)**************************/
 
 int32_t MQTT_getConnectionAge(void);
 bool MQTT_CreateConnectPacket(mqttConnectPacket *newConnectPacket);
 bool MQTT_CreatePublishPacket(mqttPublishPacket *newPublishPacket);
 bool MQTT_CreateSubscribePacket(mqttSubscribePacket *newSubscribePacket);
+bool MQTT_CreateUnsubscribePacket(mqttUnsubscribePacket *newUnsubscribePacket);
 void MQTT_initialiseState(void);
 
 mqttCurrentState MQTT_Disconnect(mqttContext *mqttContextPtr);

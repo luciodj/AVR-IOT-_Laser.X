@@ -1,12 +1,12 @@
 <config configVersion="1.1" device="ATmega4808" coreVersion="4.65">
    <usedClasses class="java.util.HashMap">
       <entry>
-         <string>RTC</string>
-         <string>class com.microchip.mcc.mcu8.modules.rtc.basic.RTC</string>
-      </entry>
-      <entry>
          <string>MQTT</string>
          <string>class com.microchip.mcc.libraries.mqtt.basic.MQTT</string>
+      </entry>
+      <entry>
+         <string>RTC</string>
+         <string>class com.microchip.mcc.mcu8.modules.rtc.basic.RTC</string>
       </entry>
       <entry>
          <string>com.microchip.mcc.boardsupportlibrary.BoardSuppportLibraryLibraryModule</string>
@@ -69,12 +69,12 @@
          <string>class com.microchip.mcc.libraries.cloudservices.google.CloudServGoogle</string>
       </entry>
       <entry>
-         <string>RSTCTRL</string>
-         <string>class com.microchip.mcc.mcu8.systemManager.rstctrl.RSTCTRL</string>
-      </entry>
-      <entry>
          <string>SLPCTRL</string>
          <string>class com.microchip.mcc.mcu8.systemManager.slpctrl.SLPCTRL</string>
+      </entry>
+      <entry>
+         <string>RSTCTRL</string>
+         <string>class com.microchip.mcc.mcu8.systemManager.rstctrl.RSTCTRL</string>
       </entry>
       <entry>
          <string>Interrupt Manager</string>
@@ -86,10 +86,10 @@
       </entry>
    </usedClasses>
    <usedLibraries class="java.util.ArrayList">
-      <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.libraries.avriot.AVRIoTLibrary" version="1.1.0"/>
-      <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.mcu8.Mcu8AVRPeripheralLibrary" version="1.1.0"/>
+      <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.mcu8.Mcu8AVRPeripheralLibrary" version="1.1.1"/>
       <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.foundationservices.library.FoundationServicesLibrary" version="0.1.34"/>
       <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.boardsupportlibrary.BoardSuppportLibrary" version="0.95.1"/>
+      <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.libraries.avriot.AVRIoTLibrary" version="1.1.1"/>
    </usedLibraries>
    <tokenMap class="java.util.HashMap">
       <entry>
@@ -293,12 +293,12 @@
          <value>output</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TWI0" name="isI2CMasterEnabled"/>
-         <value>true</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="RTC" registerAlias="CTRLA" settingAlias="PRESCALER" alias="DIV16384"/>
          <value>14</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TWI0" name="isI2CMasterEnabled"/>
+         <value>true</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC0" registerAlias="CTRLC" settingAlias="PRESC" alias="DIV128"/>
@@ -325,16 +325,16 @@
          <value></value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ADC0" name="PIN_AIN5"/>
+         <value>AIN5</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TWI0" registerAlias="SADDRMASK" settingAlias="ADDREN"/>
          <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="SPI0" registerAlias="IE" settingAlias="flag"/>
          <value>disabled</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ADC0" name="PIN_AIN5"/>
-         <value>AIN5</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="PORTA.PIN5CTRL"/>
@@ -393,12 +393,12 @@
          <value></value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ADC0" name="PIN_AIN3"/>
-         <value></value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="RTC" registerAlias="CTRLA" settingAlias="PRESCALER" alias="DIV8"/>
          <value>3</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ADC0" name="PIN_AIN3"/>
+         <value></value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="PORTA.OUT"/>
@@ -485,12 +485,12 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="SPI0" name="isSPIEnabled"/>
-         <value>true</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="RTC" name="CLK_PER"/>
          <value>10000000</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="SPI0" name="isSPIEnabled"/>
+         <value>true</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="PORTF.PIN0CTRL" settingAlias="ISC"/>
@@ -641,12 +641,12 @@
          <value></value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="SCTRLA" settingAlias="APIEN" alias="enabled"/>
-         <value>1</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ADC0" name="PIN_AIN12"/>
          <value></value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="SCTRLA" settingAlias="APIEN" alias="enabled"/>
+         <value>1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ADC0" name="PIN_AIN13"/>
@@ -777,12 +777,12 @@
          <value>2</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="USART2" registerAlias="STATUS" settingAlias="ISFIF" alias="enabled"/>
-         <value>1</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="RTC" registerAlias="CTRLA" settingAlias="PRESCALER"/>
          <value>DIV1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="USART2" registerAlias="STATUS" settingAlias="ISFIF" alias="enabled"/>
+         <value>1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="PORTF.PIN2CTRL" settingAlias="PULLUPEN" alias="enabled"/>
@@ -1417,12 +1417,12 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="USART2" registerAlias="CTRLA" settingAlias="DREIE" alias="enabled"/>
-         <value>1</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="RTC" registerAlias="CTRLA" settingAlias="PRESCALER" alias="DIV4096"/>
          <value>12</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="USART2" registerAlias="CTRLA" settingAlias="DREIE" alias="enabled"/>
+         <value>1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="PORTB.PIN3CTRL" settingAlias="ISC" alias="RISING"/>
@@ -1689,12 +1689,12 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="WINC" name="ssid"/>
-         <value>WLAN-4A2X96</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC0" registerAlias="CTRLD" settingAlias="INITDLY" alias="DLY128"/>
          <value>4</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="WINC" name="ssid"/>
+         <value>WLAN-4A2X96</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="PORTD.PIN0CTRL" settingAlias="ISC" alias="INPUT_DISABLE"/>
@@ -2365,12 +2365,12 @@
          <value>INTDISABLE</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="SYSCFG0" settingAlias="RSTPINCFG"/>
-         <value>GPIO</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="CPUINT" registerAlias="CTRLA" settingAlias="IVSEL" alias="disabled"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="SYSCFG0" settingAlias="RSTPINCFG"/>
+         <value>GPIO</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="USART2" registerAlias="CTRLB" settingAlias="RXEN"/>
@@ -2857,12 +2857,12 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="SADDRMASK" settingAlias="ADDREN" alias="enabled"/>
-         <value>1</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="ADC0" registerAlias="TEMP"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="SADDRMASK" settingAlias="ADDREN" alias="enabled"/>
+         <value>1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="PORTMUX.TCAROUTEA" settingAlias="TCA0" alias="PORTB"/>
@@ -3014,7 +3014,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="I2CSIMPLE" name="pubSubI2CSIMPLE_I2CMASTER/Functions"/>
-         <value>6784.188208393341</value>
+         <value>8618.993329081886</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="USART2" registerAlias="CTRLC" settingAlias="CHSIZE" alias="8BIT"/>
@@ -3225,12 +3225,12 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="MCTRLB" settingAlias="MCMD" alias="STOP"/>
-         <value>3</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="RTC" name="isRTCEnable"/>
          <value>true</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="MCTRLB" settingAlias="MCMD" alias="STOP"/>
+         <value>3</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="PORTF.PIN6CTRL" settingAlias="ISC" alias="FALLING"/>
@@ -3485,12 +3485,12 @@
          <value>INTDISABLE</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="DBGCTRL" settingAlias="DBGRUN" alias="disabled"/>
-         <value>0</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="AVR-IoT WG Sensor Node" name="schedulerStatus"/>
          <value>RTC</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="DBGCTRL" settingAlias="DBGRUN" alias="disabled"/>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="PORTD.PIN7CTRL" settingAlias="ISC" alias="INTDISABLE"/>
@@ -4329,12 +4329,12 @@
          <value>193</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TWI0" registerAlias="DUALCTRL" settingAlias="ENABLE"/>
-         <value>disabled</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="ADC0" registerAlias="CTRLE"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TWI0" registerAlias="DUALCTRL" settingAlias="ENABLE"/>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TWI0" registerAlias="MCTRLA" settingAlias="SMEN"/>
@@ -4777,12 +4777,12 @@
          <value>2</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="USART2" registerAlias="CTRLC" settingAlias="CMODE" alias="MSPI"/>
-         <value>3</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="RTC" registerAlias="CMPI" settingAlias="flag"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="USART2" registerAlias="CTRLC" settingAlias="CMODE" alias="MSPI"/>
+         <value>3</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TWI0" name="PIN_SCL_DEF"/>
@@ -4793,12 +4793,12 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Cloud Services Google" name="cryptoStatus"/>
-         <value>CryptoAuthLib</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="RTC" registerAlias="PITCTRLA" settingAlias="PERIOD"/>
          <value>OFF</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Cloud Services Google" name="cryptoStatus"/>
+         <value>CryptoAuthLib</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="PORTA.PIN3CTRL" settingAlias="ISC"/>
@@ -4929,12 +4929,12 @@
          <value>ISR_USART2_ABE</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="SPI0" registerAlias="CTRLB" settingAlias="SSD"/>
-         <value>disabled</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="ADC0" registerAlias="WINHT"/>
          <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="SPI0" registerAlias="CTRLB" settingAlias="SSD"/>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="RTC" registerAlias="CLKSEL"/>
@@ -5085,12 +5085,12 @@
          <value>4</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TWI0" registerAlias="SCTRLA" settingAlias="DIEN"/>
-         <value>disabled</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="WINC" name="auth"/>
          <value>M2M_WIFI_SEC_WPA_PSK</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TWI0" registerAlias="SCTRLA" settingAlias="DIEN"/>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="PORTD.PIN7CTRL" settingAlias="INVEN" alias="enabled"/>
@@ -5709,12 +5709,12 @@
          <value>false</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="MCTRLB" settingAlias="MCMD" alias="REPSTART"/>
-         <value>1</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ADC0" name="isADCEnable"/>
          <value>true</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="MCTRLB" settingAlias="MCMD" alias="REPSTART"/>
+         <value>1</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="WDT" registerAlias="STATUS" settingAlias="SYNCBUSY"/>
@@ -6129,11 +6129,11 @@
          <value>3</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="System Module" registerAlias="BODCFG" settingAlias="ACTIVE" alias="DIS"/>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="CPUINT" registerAlias="CTRLA"/>
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="CPUINT" registerAlias="CTRLA"/>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="System Module" registerAlias="BODCFG" settingAlias="ACTIVE" alias="DIS"/>
          <value>0</value>
       </entry>
       <entry>
@@ -6737,15 +6737,15 @@
          <value>3</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="RTC" registerAlias="INTCTRL" settingAlias="OVF" alias="enabled"/>
+         <value>1</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TWI0" registerAlias="CTRLA" settingAlias="SDAHOLD"/>
          <value>OFF</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="MSTATUS" settingAlias="ARBLOST" alias="enabled"/>
-         <value>1</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="RTC" registerAlias="INTCTRL" settingAlias="OVF" alias="enabled"/>
          <value>1</value>
       </entry>
       <entry>
@@ -6837,16 +6837,16 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="MCTRLA" settingAlias="ENABLE" alias="disabled"/>
-         <value>0</value>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="RTC" registerAlias="CTRLA" settingAlias="PRESCALER" alias="DIV1024"/>
+         <value>10</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="ADC0" registerAlias="DBGCTRL" settingAlias="DBGRUN"/>
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="RTC" registerAlias="CTRLA" settingAlias="PRESCALER" alias="DIV1024"/>
-         <value>10</value>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="MCTRLA" settingAlias="ENABLE" alias="disabled"/>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="PORTA.PORTCTRL"/>
@@ -7161,11 +7161,11 @@
          <value>1</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC0" registerAlias="INTFLAGS" settingAlias="WCMP" alias="enabled"/>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="RTC" registerAlias="CTRLA"/>
          <value>1</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="RTC" registerAlias="CTRLA"/>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="ADC0" registerAlias="INTFLAGS" settingAlias="WCMP" alias="enabled"/>
          <value>1</value>
       </entry>
       <entry>
@@ -7581,12 +7581,12 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="ADC0" registerAlias="CTRLE" settingAlias="WINCM"/>
-         <value>NONE</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="RTC" registerAlias="CLKSEL" settingAlias="CLKSEL" alias="TOSC32K"/>
          <value>2</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="ADC0" registerAlias="CTRLE" settingAlias="WINCM"/>
+         <value>NONE</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="WDT" registerAlias="CTRLA" settingAlias="WINDOW" alias="64CLK"/>
@@ -7989,12 +7989,12 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TWI0" name="SCL_Frequency"/>
-         <value>100000</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="ADC0" registerAlias="INTCTRL" settingAlias="WCMP"/>
          <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TWI0" name="SCL_Frequency"/>
+         <value>100000</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="PORTD.PIN2CTRL" settingAlias="ISC" alias="BOTHEDGES"/>
@@ -8105,12 +8105,12 @@
          <value>3</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="USART2" registerAlias="CTRLA"/>
-         <value>0</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="RTC" registerAlias="PITCTRLA" settingAlias="PERIOD" alias="CYC256"/>
          <value>7</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="USART2" registerAlias="CTRLA"/>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="PORTD.OUTTGL"/>
@@ -8613,12 +8613,12 @@
          <value>3</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="MCTRLA" settingAlias="SMEN" alias="disabled"/>
-         <value>0</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="WINC" name="wifipass"/>
          <value>7590365358457036</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TWI0" registerAlias="MCTRLA" settingAlias="SMEN" alias="disabled"/>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="PORTMUX.USARTROUTEA" settingAlias="USART2" alias="NONE"/>
@@ -8668,7 +8668,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/mcc.h</file>
-         <hash>83763e9c6301e18b24f1fdd485c90c7fab4626095f4cc2a116086571923df1c1</hash>
+         <hash>c509d1a05640a9cdd82170555f185edf15898767bfb8701fd60fa300ca178c5e</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/mqtt/mqtt_packetTransfer_interface.c</file>
@@ -8692,7 +8692,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/cloud/wifi_service.h</file>
-         <hash>0707c40b122685f07db57da4fce717dc2f9e9bc3cd46736ad97331d18a695244</hash>
+         <hash>2604eaf0ccdd10255fee0a957ca2ca6f3b72c367ffd8ebe15145b6dc39826650</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/winc/common/source/nm_common.c</file>
@@ -8700,7 +8700,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/cloud/wifi_service.c</file>
-         <hash>847f6f61854997ec36ed2bb32cdd8a9e596efd2518800ae7bd7106044d4d3a5f</hash>
+         <hash>cd0889ff874bf01e51add99709df53c12e434e41bd0cd4193d010a4b469dae14</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/include/spi0.h</file>
@@ -8712,7 +8712,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/application_manager.h</file>
-         <hash>f94746a81508acc8e53f72286ba9dd53d9bcb773ed3901ca4c2026a7d585f4aa</hash>
+         <hash>ea3b748866a6673d2cd10cb2ddacaf9ffa19c020f053e767e8da9ab1cb6f0707</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/winc/socket/source/socket_internal.h</file>
@@ -8728,7 +8728,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/application_manager.c</file>
-         <hash>495bf4096d98513385ad148737337188e1fd0c340c2e86b4a9d4c1c21422b14c</hash>
+         <hash>51dc0f2e3a434750d26ab0e27ecc38b546c2bf92ccd6f71226828563d1ac9b71</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/driver_isr.c</file>
@@ -8751,20 +8751,20 @@
          <hash>441cb6582de43ad74ac4214baefc6e24509155de553b7881b45a7f60aba3f96e</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/hal/hal_timer.c</file>
-         <hash>edba819555dbb0176149eae38182f7a7c6431e4d554054ba0e1ec81ba8da48d7</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/winc/driver/source/m2m_ate_mode.c</file>
          <hash>316153d28d523c5c5dd900098555b692e2a9941a8f7ba1acbb43de4751671eea</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/crypto/hashes/sha1_routines.h</file>
-         <hash>e7dc9368a50a5570c348fff3599acaedf8e61cc6b5b4656277b56b66ec570249</hash>
+         <file>mcc_generated_files/cryptoauthlib/lib/hal/hal_timer.c</file>
+         <hash>edba819555dbb0176149eae38182f7a7c6431e4d554054ba0e1ec81ba8da48d7</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/credentials_storage/credentials_storage.h</file>
-         <hash>5278323eade2d0411e7f03b23f54160e16362ae8efb45a89a8977d5534546f65</hash>
+         <hash>861e3dd8fa57d023253ab10332c197236b47fa8fc4f2078bea0c66728e7a6e3d</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/cryptoauthlib/lib/crypto/hashes/sha1_routines.h</file>
+         <hash>e7dc9368a50a5570c348fff3599acaedf8e61cc6b5b4656277b56b66ec570249</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/cryptoauthlib/lib/crypto/hashes/sha1_routines.c</file>
@@ -8788,7 +8788,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/cloud/bsd_adapter/bsdWINC.c</file>
-         <hash>9041f5cee141c78ac43dede05ae679ae151687e2d351f31aa932be6f3c7648cb</hash>
+         <hash>4dbdd78ff3aa5c972cf73c1f21a4d361d09ba54610c56be65c713d61705ba89e</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/sensors_handling.c</file>
@@ -8803,24 +8803,24 @@
          <hash>773bd03e2e7e360f693e377a6897fc2cb12b542a19efa7a602bc00b6b963aeef</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/crypto/hashes/sha2_routines.c</file>
-         <hash>5edac1b1c8e2c8c67c64a7bbf423d006feda0da1cc722a05d09a028a8c8bb404</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/winc/driver/source/m2m_ssl.c</file>
          <hash>901a68bd9ebd7d61abedf1bdd91188f50422bdb88f9981e0489381bf30063be8</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/cryptoauthlib/lib/crypto/hashes/sha2_routines.c</file>
+         <hash>5edac1b1c8e2c8c67c64a7bbf423d006feda0da1cc722a05d09a028a8c8bb404</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/cryptoauthlib/lib/atca_device.h</file>
          <hash>c9928f59211c30d2120fd622b361fddc65b673d598c0e9a0e2e120c52080f404</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/atca_device.c</file>
-         <hash>b6de5c44cae45792701e66695fd2882f19285f11736522fc1116b20cd32b53f2</hash>
+         <file>mcc_generated_files/credentials_storage/credentials_storage.c</file>
+         <hash>b207d693701ff6844f1276c7fe2758e832d36ccab41ea79e921100fb8e889764</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/credentials_storage/credentials_storage.c</file>
-         <hash>b053ecdcde89f3e62c4c577941d1707d41193130f64791f12415b97ac95766ca</hash>
+         <file>mcc_generated_files/cryptoauthlib/lib/atca_device.c</file>
+         <hash>b6de5c44cae45792701e66695fd2882f19285f11736522fc1116b20cd32b53f2</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/drivers/i2c_simple_master.h</file>
@@ -8839,12 +8839,12 @@
          <hash>45414928392737ef6565a889873f7ef3a69ce7ed953200e5bc4746ac6f432174</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/basic/atca_basic_updateextra.c</file>
-         <hash>dd537a8dae55484a3cf1e328076593f6afa4e414c88129262ea5a333fe3d2252</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/drivers/i2c_simple_master.c</file>
          <hash>40000f0067ed7c5df30147d745b814bfc062df1c62f9ce0c92ad308d4ab5f8f0</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/cryptoauthlib/lib/basic/atca_basic_updateextra.c</file>
+         <hash>dd537a8dae55484a3cf1e328076593f6afa4e414c88129262ea5a333fe3d2252</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/device_config.c</file>
@@ -8879,12 +8879,12 @@
          <hash>419ca59c8bbd8a5b74d9e1095c2daeb071f2acd52cc14d95134ecb0e27952e4b</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/include/cpuint.h</file>
-         <hash>24cc3756c75c672b54559a90338782c1ac62b620869fa4d48046a551d3990fe1</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/src/wdt.c</file>
          <hash>390f851e4c35911723bcfdc9ca266632c6f8b028131dcfcddbcb19483c5d0e1a</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/include/cpuint.h</file>
+         <hash>24cc3756c75c672b54559a90338782c1ac62b620869fa4d48046a551d3990fe1</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/include/port.h</file>
@@ -8931,12 +8931,12 @@
          <hash>ea1ca4db53593509e711b85c06cf6e090777184b577899e318658cbe845f670f</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/jwt/atca_jwt.h</file>
-         <hash>97aad38e6689adbeabd332a847788f7deff5d28548df890135f6c630672883eb</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/cli/cli.h</file>
          <hash>3b52db427584cfc99ec0daacc11e5ce0614e094de0675212c5f2e9a457b489e7</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/cryptoauthlib/lib/jwt/atca_jwt.h</file>
+         <hash>97aad38e6689adbeabd332a847788f7deff5d28548df890135f6c630672883eb</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/cryptoauthlib/lib/atca_command.h</file>
@@ -8963,12 +8963,12 @@
          <hash>5a27cb0d487f3336a75e89605e39b67579bca3a2aff1c317a33e437493cffeda</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/atcacert/atcacert_date.h</file>
-         <hash>019dbd6cfbc8dac0b81959b1a05162e863efd02000fd1b6e06a7f5d966cdfeba</hash>
+         <file>mcc_generated_files/cli/cli.c</file>
+         <hash>769a5358900972ed63b53aa4ae671407f1831d346a374a53cfa7aa37e80fa759</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cli/cli.c</file>
-         <hash>15e6130e5f3f025cfb0284f8fc7cc562630fc83dfd135d59fcaf3fb144abce09</hash>
+         <file>mcc_generated_files/cryptoauthlib/lib/atcacert/atcacert_date.h</file>
+         <hash>019dbd6cfbc8dac0b81959b1a05162e863efd02000fd1b6e06a7f5d966cdfeba</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/cryptoauthlib/lib/jwt/atca_jwt.c</file>
@@ -8987,12 +8987,12 @@
          <hash>eae0ed183f9b1e6203832f764b441b734408e2e2c75b4ec7c0fc3ee1434cb018</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/basic/atca_basic_verify.c</file>
-         <hash>d5fb63b0aeaee52f974cafe1d7ce3a2f70184d53a7241a6d397c1899c63bad4a</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/winc/bsp/include/nm_bsp_internal.h</file>
          <hash>993e200efc99e5e5b5e50569d3c72ea2ceee082a2f45359c905e269ff45fd12b</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/cryptoauthlib/lib/basic/atca_basic_verify.c</file>
+         <hash>d5fb63b0aeaee52f974cafe1d7ce3a2f70184d53a7241a6d397c1899c63bad4a</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/winc/driver/source/m2m_hif.c</file>
@@ -9024,15 +9024,15 @@
       </entry>
       <entry>
          <file>mcc_generated_files/debug_print.h</file>
-         <hash>e14e10172c7b452a192ae5590028fe74a68697543541fc78c213b5d152dacd92</hash>
+         <hash>da703b655dff0035beefb12c513ff1445d6317693d97b87e38a8bf0927826d83</hash>
+      </entry>
+      <entry>
+         <file>main.c</file>
+         <hash>3b3a35176b091de1b8e50534992afdb1aab73bbfb95b87e0fa6c13ece34f8975</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/utils/assembler.h</file>
          <hash>01f8b55eaf03501e9c1a9a7361d9a470a95d22be20d52713a39c17cca2fdc5d8</hash>
-      </entry>
-      <entry>
-         <file>main.c</file>
-         <hash>2aa4fbbc61370bc3c529eb3113e736eac74ba40681b82e86dd3e4e107ad51af7</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/cryptoauthlib/lib/basic/atca_basic_genkey.c</file>
@@ -9044,7 +9044,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/src/rtc.c</file>
-         <hash>9b52568e0c747794948b3c3102a2b7857ae6d2b2e88ee65802d0361582a7989a</hash>
+         <hash>5ce302fdd997a702314702ebce977979bf6799ddcbadf69e5e36bc471958cf49</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/cryptoauthlib/lib/basic/atca_basic_nonce.c</file>
@@ -9064,19 +9064,19 @@
       </entry>
       <entry>
          <file>mcc_generated_files/src/pin_manager.c</file>
-         <hash>1d56b9d79839b918a6019512f588bf8ea0db269d390194187bf00c43adda2e9d</hash>
+         <hash>fb0f14dfa252a811e3899741b6188419cef1fee8b7102c38ba1ef992995dda99</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/led.h</file>
-         <hash>c2c1fcb686c8098cddf53a3e9ded8a65d81126971c25ac8242ba3d0e0fb595f3</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files/winc/programmer/programmer_apis.h</file>
-         <hash>72143a99bf5cc2a31c6d9a3c5c6c3c392502b426f43ec22feaf9d08c0e8a3043</hash>
+         <hash>c3346b6466558eaf4f82d38fc2f9ceb9f1bcea52709cf5b6b37607889e94eae9</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/src/cpuint.c</file>
          <hash>64d72a84c40b7a3a0d0454679cf699658c22ab04d22034605cb9643af7967d66</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/winc/programmer/programmer_apis.h</file>
+         <hash>72143a99bf5cc2a31c6d9a3c5c6c3c392502b426f43ec22feaf9d08c0e8a3043</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/src/spi0.c</file>
@@ -9092,7 +9092,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/led.c</file>
-         <hash>47506fd4a37a259708a7a94e9544e28d1f5d1073eb8020aaf3cc8643ee88c8cb</hash>
+         <hash>3ef6498e866ad943b22c9196366f4bca9a06e902ee3ee79d47264fe358faa009</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/winc/common/include/nm_common.h</file>
@@ -9100,7 +9100,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/debug_print.c</file>
-         <hash>e3524b6ca5a09106167f4f74dc985c9c1e55013865bb7a915c78cfa89f47bda9</hash>
+         <hash>cfdef2eeb2b1e7f1cdfca8f2d3224acbe2890edd421144d6911b90cd20934b28</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/src/adc0.c</file>
@@ -9148,7 +9148,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/mqtt/mqtt_core/mqtt_core.h</file>
-         <hash>68cf9462b96e45fea9ccc41a5a75095717c0f902360cd948cb4ebed0b4617953</hash>
+         <hash>df6c3e83e12212f74ab97dc58a860ffdc80db4e345a243c174a0808c02a85b07</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/utils/assembler/iar.h</file>
@@ -9159,16 +9159,16 @@
          <hash>926a18e5b8764c673db22b4df5f8e0e38f0ec0478605490dc1539e79670b2538</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/host/atca_host.h</file>
-         <hash>10515cd7124c4784da6eb4ca8ea84332ef4464a5654c88f3f9ce01c09fa44ade</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/winc/driver/source/nmasic.c</file>
          <hash>0d181dee436b21a9d6734e2afceedbe4049ad325887b498b7cdb3f596f889c38</hash>
       </entry>
       <entry>
+         <file>mcc_generated_files/cryptoauthlib/lib/host/atca_host.h</file>
+         <hash>10515cd7124c4784da6eb4ca8ea84332ef4464a5654c88f3f9ce01c09fa44ade</hash>
+      </entry>
+      <entry>
          <file>mcc_generated_files/mqtt/mqtt_core/mqtt_core.c</file>
-         <hash>654b86b5b2fdbfebe55c97696368b77954b673366d81871836d2900d364756ca</hash>
+         <hash>c98a9bb414af702ca0812758293f6caae4d25cdc152578318ab63485dbfbdd2b</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/include/wdt.h</file>
@@ -9187,12 +9187,12 @@
          <hash>2079e4842c6a6c69b89c4a6a8cf9dbd9e72111325318736d02aabeb2ab1a0031</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/cryptoauthlib.h</file>
-         <hash>c93c062ce869241a9c4371d8a91f0683df670e79f24356fcca37c7aaea8a8de6</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/banner.h</file>
          <hash>91f736936c543cebe8d1a42ddf2914d5c64d6f95698631f9c550026103995713</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/cryptoauthlib/lib/cryptoauthlib.h</file>
+         <hash>c93c062ce869241a9c4371d8a91f0683df670e79f24356fcca37c7aaea8a8de6</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/winc/driver/source/nmdrv.c</file>
@@ -9247,12 +9247,12 @@
          <hash>626ad0be092ed81e9518c00412a88c6384baa4f80fae17724cb8833d4e7ba118</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/host/atca_host.c</file>
-         <hash>6c924696a27ccb47215332fb4d4e4bc2967b765de3afee7c1700a8b71dfefad8</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/winc/driver/source/nmasic.h</file>
          <hash>07cc2676f02937a632ea818023a48adb710effe1bd8f3d3201e6466b1ff7e3ab</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/cryptoauthlib/lib/host/atca_host.c</file>
+         <hash>6c924696a27ccb47215332fb4d4e4bc2967b765de3afee7c1700a8b71dfefad8</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/cryptoauthlib/lib/crypto/atca_crypto_sw_rand.c</file>
@@ -9267,12 +9267,12 @@
          <hash>8b29c799cd682436529139ae5e043a75bc313dab4879c10080e9c8a465ceea45</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/config/clock_config.h</file>
-         <hash>7b796e00324be872d58ba4b8ac72c3fe304223ff1f5cdf776b782ba589a048b8</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/cryptoauthlib/lib/basic/atca_basic_mac.c</file>
          <hash>c7eae6f739dbf40ad898b1aff544f1d1c834c3b6a4ed3f2ac52140b4b27689e6</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/config/clock_config.h</file>
+         <hash>7b796e00324be872d58ba4b8ac72c3fe304223ff1f5cdf776b782ba589a048b8</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/config/conf_winc.h</file>
@@ -9303,12 +9303,12 @@
          <hash>e3421a3960431265ab30114041fe1fe8aeec4985e5d887d05d4b9176211c1694</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/tls/atcatls.c</file>
-         <hash>b9701f6fc2add06afd5d3d826eb6234d32ae44385f99b0f76760b59659a386f1</hash>
+         <file>mcc_generated_files/cloud/crypto_client/crypto_client.c</file>
+         <hash>0feef38b1b4c8544787016d0926450e5059325ad048a4bac54bcbf6908585e18</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cloud/crypto_client/crypto_client.c</file>
-         <hash>0f59d236ec996c99933164dddc7f0cb32a304b6a4248d41c525f277a0ea0c090</hash>
+         <file>mcc_generated_files/cryptoauthlib/lib/tls/atcatls.c</file>
+         <hash>b9701f6fc2add06afd5d3d826eb6234d32ae44385f99b0f76760b59659a386f1</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/winc/driver/source/nmuart.c</file>
@@ -9340,11 +9340,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/include/pin_manager.h</file>
-         <hash>ea16f045d0d984b59e89660234b09c3f35e86753bd5a6feae71fc8e13ff9110d</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/tls/atcatls.h</file>
-         <hash>9ebc53216b53fb2b8b3adb07c6b23baeff99c9fb4cd147bb7c08576e67a69fe8</hash>
+         <hash>bdcb7582cb361033bc1eb043a77bfab81323232f0d0856d58a83cd5d4de943db</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/cloud/crypto_client/crypto_client.h</file>
@@ -9352,15 +9348,19 @@
       </entry>
       <entry>
          <file>mcc_generated_files/config/IoT_Sensor_Node_config.h</file>
-         <hash>8c57152b7ceab2b9f67db43bc15e2c8c30f1923f28655eb042028d6b618fac76</hash>
+         <hash>79f2a4ecaf3fbcef224629766a166aa84462ba4dc7765d28d80b12633e8c1579</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/basic/atca_basic_random.c</file>
-         <hash>d8048d9c5f4fb7a8ed2ea2d2f62b9b7d5d4425f9936ba09baf5b00b0057e8dfb</hash>
+         <file>mcc_generated_files/cryptoauthlib/lib/tls/atcatls.h</file>
+         <hash>9ebc53216b53fb2b8b3adb07c6b23baeff99c9fb4cd147bb7c08576e67a69fe8</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/winc/driver/source/nmuart.h</file>
          <hash>7a0b43a44ad9f91f739b8f569c70c5e0095357915b3da4626abd0c3a0fa7da79</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/cryptoauthlib/lib/basic/atca_basic_random.c</file>
+         <hash>d8048d9c5f4fb7a8ed2ea2d2f62b9b7d5d4425f9936ba09baf5b00b0057e8dfb</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/winc/driver/include/m2m_crypto.h</file>
@@ -9372,7 +9372,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/config/mqtt_config.h</file>
-         <hash>b6cdc842682a32939214313077ff447ff39be1f60c122fb14fd640889e0473ca</hash>
+         <hash>b9ba78243bbf6056ed4ef302791b7dc6afd78bf5b54d24036780ad8d24d2546a</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/src/slpctrl.c</file>
@@ -9447,20 +9447,20 @@
          <hash>70b30b91e87e376d5a0b2e6cef5115e929bec2ec69ecda6add46256663c0f1a6</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/include/ccp.h</file>
-         <hash>41d0cd497b8cf56d50c95c9e110dfd3e13be731047edea41d68bb2ad8d19f671</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/cryptoauthlib/lib/atcacert/atcacert_der.h</file>
          <hash>937ad878ea381b87dca9e63406f54f388bae433e0d72272ae2d6391013d517b7</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/cryptoauthlib/lib/hal/atca_start_iface.h</file>
-         <hash>e23e16223cc1676cec9f604987cd71a1c88f08ed233f0a6bf82afb59e6506ecb</hash>
+         <file>mcc_generated_files/include/ccp.h</file>
+         <hash>41d0cd497b8cf56d50c95c9e110dfd3e13be731047edea41d68bb2ad8d19f671</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/winc/bus_wrapper/include/nm_bus_wrapper.h</file>
          <hash>80848ca74e0b63f9afd99a4cd57664cb68a94fa6e79a3e78441882e4217e4982</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/cryptoauthlib/lib/hal/atca_start_iface.h</file>
+         <hash>e23e16223cc1676cec9f604987cd71a1c88f08ed233f0a6bf82afb59e6506ecb</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/cloud/crypto_client/cryptoauthlib_main.h</file>
@@ -9488,7 +9488,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/cloud/cloud_service.c</file>
-         <hash>ad3c6f0ac942a94d94faf78dddf5ec9532bb3332186629908036fec82a2060cf</hash>
+         <hash>415983fa196ac34b2b81148f82bb373c6de3155756975341c33a6273073da5a2</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/mqtt/mqtt_exchange_buffer/mqtt_exchange_buffer.h</file>

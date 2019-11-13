@@ -31,79 +31,17 @@
 #include <string.h>
 #include <stdlib.h>
 #include "credentials_storage.h"
-#include "../debug_print.h"
-
-#define EEPROM_SSID  0
-#define EEPROM_PSW   EEPROM_SSID + MAX_WIFI_CREDENTIALS_LENGTH
-#define EEPROM_SEC   EEPROM_PSW + MAX_WIFI_CREDENTIALS_LENGTH
-#define EEPROM_DBG   EEPROM_SEC + 1
 
 char ssid[MAX_WIFI_CREDENTIALS_LENGTH];
 char pass[MAX_WIFI_CREDENTIALS_LENGTH];
 char authType[2];
 
-uint8_t CREDENTIALS_STORAGE_getDebugSeverity(void)
+void CREDENTIALS_STORAGE_clearWifiCredentials(void)
 {
-   return eeprom_read_byte((uint8_t *)EEPROM_DBG);
+	memset(ssid, 0, sizeof(ssid));
+	memset(pass, 0, sizeof(pass));	
+	memset(authType, 0 ,sizeof(authType));
 }
 
-void CREDENTIALS_STORAGE_setDebugSeverity(uint8_t s)
-{
-   eeprom_write_byte((uint8_t *)EEPROM_DBG,s);
-}
 
-/**
- * \brief Read WiFi SSID and password from EEPROM
- *
- * \param ssidbuf     buffer for SSID
- * \param passwordbuf buffer for password
- * \param sec         pointer to security type
- */
-void CREDENTIALS_STORAGE_read(char *ssidbuf, char *passwordbuf, char *sec)
-{
-    uint8_t i = MAX_WIFI_CREDENTIALS_LENGTH;
-    uint8_t *addr = EEPROM_SSID;
-    while (i--)
-    {
-        *ssidbuf++ = eeprom_read_byte((uint8_t *)addr++);
-    }
-    i = MAX_WIFI_CREDENTIALS_LENGTH;
-    addr = (uint8_t *)EEPROM_PSW;
-    while (i--)
-    {
-        *passwordbuf++ = eeprom_read_byte((uint8_t *)addr++);
-    }
-    *sec = eeprom_read_byte((uint8_t *)EEPROM_SEC);
-}
-
-/**
- * \brief Store WiFi SSID and password to EEPROM
- *
- * \param ssidbuf     buffer with SSID
- * \param passwordbuf buffer with password
- * \param sec         pointer to security type
- */
-void CREDENTIALS_STORAGE_save(char *ssidbuf, char *passwordbuf, char *sec)
-{
-    uint8_t i = MAX_WIFI_CREDENTIALS_LENGTH;
-    uint8_t *addr = EEPROM_SSID;
-
-    i = strlen(ssidbuf) + 1;
-
-    while (i--)
-    {
-        eeprom_write_byte((uint8_t *)addr++, *ssidbuf++);
-    }
-
-    i = MAX_WIFI_CREDENTIALS_LENGTH;
-    addr = (uint8_t *)EEPROM_PSW;
-
-    i = strlen(passwordbuf) + 1;
-    while (i--)
-    {
-        eeprom_write_byte((uint8_t *)addr++, (uint8_t)*passwordbuf++);
-    }
-
-    eeprom_write_byte((uint8_t *)EEPROM_SEC, (uint8_t)*sec);
-}
 

@@ -28,6 +28,8 @@
 #ifndef DEBUG_PRINT_H
 #define DEBUG_PRINT_H
 
+#include "config/IoT_Sensor_Node_config.h"
+
 #define CSI_RESET   "\33[0m"
 #define CSI_BLACK   "\33[30m"
 #define CSI_RED     "\33[31m"
@@ -61,7 +63,7 @@ typedef enum
 
 #include "banner.h"
 
-#define IOT_DEBUG_PRINT  0
+#define IOT_DEBUG_PRINT CFG_DEBUG_MSG
 
 void debug_printer(debug_severity_t debug_severity, debug_errorLevel_t error_level, char* format, ...);
 void debug_setSeverity(debug_severity_t debug_level);

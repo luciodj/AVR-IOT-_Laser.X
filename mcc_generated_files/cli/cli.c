@@ -36,9 +36,13 @@
 #include "../credentials_storage/credentials_storage.h"
 #include "../mqtt/mqtt_core/mqtt_core.h"
 #include "../debug_print.h"
+#include "../cloud/wifi_service.h"
+#include "../mqtt/mqtt_comm_bsd/mqtt_comm_layer.h"
+#include "../cloud/cloud_service.h"
 
-#define WIFI_PARAMS_OPEN_CNT    1
-#define WIFI_PARAMS_PSK_CNT     2
+#define WIFI_PARAMS_OPEN    1
+#define WIFI_PARAMS_PSK     2
+#define WIFI_PARAMS_WEP     3
 #define MAX_COMMAND_SIZE        100
 #define MAX_PUB_KEY_LEN         200
 #define NEWLINE "\r\n"
@@ -61,7 +65,7 @@ static uint8_t index = 0;
 static bool commandTooLongFlag = false;
 
 const char * const cli_version_number             = "2.0";
-const char * const firmware_version_number        = "sharks"; // based on v.1.1.0
+const char * const firmware_version_number        = "sharks 1.1.1"; 
 
 static void command_received(char *command_text);
 static void reset_cmd(char *pArg);
@@ -77,6 +81,7 @@ static bool endOfLineTest(char c);
 static void enableUsartRxInterrupts(void);
 
 #define CLI_TASK_INTERVAL      50
+
 absolutetime_t CLI_task(void*);
 timer_struct_t CLI_task_timer             = {CLI_task};
 
@@ -122,10 +127,12 @@ static bool endOfLineTest(char c)
 
 absolutetime_t CLI_task(void* param)
 {
+    bool cmd_rcvd = false;
+	char c = 0;
    // read all the EUSART bytes in the queue
    while(USART_2_is_rx_ready() && !isCommandReceived)
    {
-      char c = USART_2_read();
+      c = USART_2_read();
       // read until we get a newline
       if(c == '\r' || c == '\n')
       {
@@ -133,9 +140,10 @@ absolutetime_t CLI_task(void* param)
 
          if(!commandTooLongFlag)
          {
-            if( endOfLineTest(c) )
+            if( endOfLineTest(c) && !cmd_rcvd )
             {
                command_received((char*)command);
+			   cmd_rcvd = true;
             }
          }
          if(commandTooLongFlag)
@@ -163,40 +171,69 @@ absolutetime_t CLI_task(void* param)
 
 static void set_wifi_auth(char *ssid_pwd_auth)
 {
-    char *credentials[4];
+    char *credentials[3];
     char *pch;
-    uint8_t paramCnt = 0;
+    uint8_t params = 0;
+	uint8_t i;
+
+    for(i=0;i<=2;i++)credentials[i]='\0';
 
     pch = strtok (ssid_pwd_auth, ",");
-    while (pch != NULL && paramCnt <= WIFI_PARAMS_PSK_CNT)
+    credentials[0]=pch;
+
+    while (pch != NULL && params <= 2)
     {
-        credentials[paramCnt++] = pch;
-        pch = strtok (NULL, ", ");
+        credentials[params] = pch;
+        params++;
+        pch = strtok (NULL, ",");
+
     }
 
-    switch (paramCnt)
+    if(credentials[0]!=NULL)
     {
-        case WIFI_PARAMS_OPEN_CNT:
+        if(credentials[1]==NULL && credentials[2]==NULL) params=1;
+        else if(credentials[1]!= NULL && credentials[2]== NULL)
+        {
+            params=atoi(credentials[1]);//Resuse the same variable to store the auth type
+            if (params==2 || params==3)params=5;
+            else if(params==1);
+            else params=2;
+        }
+		else params = atoi(credentials[2]);
+    }
+
+    switch (params)
+    {
+        case WIFI_PARAMS_OPEN:
                 strncpy(ssid, credentials[0],MAX_WIFI_CREDENTIALS_LENGTH-1);
                 strcpy(pass, "\0");
                 strcpy(authType, "1");
-                CREDENTIALS_STORAGE_save(ssid, pass, authType);
-                printf("OK\r\n\4");
             break;
 
-        case WIFI_PARAMS_PSK_CNT:
-		case WIFI_PARAMS_PSK_CNT+1:
+        case WIFI_PARAMS_PSK:
+		case WIFI_PARAMS_WEP:
                 strncpy(ssid, credentials[0],MAX_WIFI_CREDENTIALS_LENGTH-1);
                 strncpy(pass, credentials[1],MAX_WIFI_CREDENTIALS_LENGTH-1);
-                strncpy(authType, "2",2);
-                CREDENTIALS_STORAGE_save(ssid, pass, authType);
-                printf("OK\r\n\4");
+                sprintf(authType, "%d", params);
             break;
 
         default:
-            printf("Error. Wi-Fi command format is wifi <ssid>[,<pass>].\r\n\4");
+			params = 0;
             break;
     }
+	if (params)
+	{
+		printf("OK\r\n\4");
+        if(CLOUD_isConnected())
+        {
+            MQTT_Close(MQTT_GetClientConnectionInfo());
+}
+		wifi_disconnectFromAp();
+	}
+	else
+	{
+		printf("Error. Wi-Fi command format is wifi <ssid>[,<pass>,[authType]]\r\n\4");
+	}
 }
 
 static void reconnect_cmd(char *pArg)
@@ -221,7 +258,6 @@ static void set_debug_level(char *pArg)
    if(*pArg >= '0' && *pArg <= '4')
    {
       level = *pArg - '0';
-      CREDENTIALS_STORAGE_setDebugSeverity(level);
       debug_setSeverity(level);
       printf("OK\r\n");
    }
@@ -283,6 +319,7 @@ static void command_received(char *command_text)
     uint8_t cmp;
     uint8_t ct_len;
     uint8_t cc_len;
+	uint8_t i = 0;
 
     if (argument != NULL)
     {
@@ -292,7 +329,7 @@ static void command_received(char *command_text)
         argument++;
     }
 
-    for (uint8_t i = 0; i < sizeof(commands)/sizeof(*commands); i++)
+    for (i = 0; i < sizeof(commands)/sizeof(*commands); i++)
     {
         cmp = strcmp(command_text, commands[i].command);
         ct_len = strlen(command_text);

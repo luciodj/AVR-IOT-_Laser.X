@@ -112,11 +112,12 @@ bsdErrno_t BSD_GetErrNo(void)
 }
 
 packetReceptionHandler_t* getSocketInfo(uint8_t sock)
-{
+{   
+   uint8_t i = 0;
    if (sock >= 0)
    {
       packetReceptionHandler_t *bsdSocketInfo = BSD_GetRecvHandlerTable();
-      for(uint8_t i = 0; i < MAX_SUPPORTED_SOCKETS; i++)
+      for(i = 0; i < MAX_SUPPORTED_SOCKETS; i++)
       {
          if(bsdSocketInfo)
          {

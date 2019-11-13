@@ -13,6 +13,8 @@
 // <id> application_timeout
 #define CFG_TIMEOUT 5000
 
-// </h>
+#define CFG_DEBUG_MSG  0
+
+#define CFG_ENABLE_CLI 1
 
 #endif // IOT_SENSOR_NODE_CONFIG_H

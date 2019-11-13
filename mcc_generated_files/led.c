@@ -25,13 +25,31 @@
     SOFTWARE.
 */
 
+#include <stdbool.h>
 #include "mcc.h"
 #include "config/clock_config.h"
+
 #include <util/delay.h>
 #include "led.h"
 
-#define LEDS_TEST_INTERVAL	50
+#define LEDS_TEST_INTERVAL	50L
+#define LED_ON_INTERVAL     200L
+#define LEDS_HOLD_INTERVAL	2000L
 
+static bool ledForDefaultCredentials = false;
+static bool ledHeld = false;
+
+static absolutetime_t yellow_task(void *payload);
+static timer_struct_t yellow_timer = {yellow_task};
+
+static absolutetime_t red_task(void *payload);
+static timer_struct_t red_timer = {red_task};
+
+static absolutetime_t defaultCredentials_task(void *payload);
+static timer_struct_t defaultCredentials_timer = {defaultCredentials_task};
+
+static absolutetime_t softAp_task(void *payload);
+static timer_struct_t softAP_timer = {softAp_task};
 
 static void testSequence (uint8_t ledState)
 {
@@ -51,15 +69,10 @@ void LED_test(void)
 	testSequence(LED_OFF);
 }
 
-static absolutetime_t yellow_task(void *payload);
-static timer_struct_t yellow_timer = {yellow_task};
-	
-static absolutetime_t red_task(void *payload);
-static timer_struct_t red_timer = {red_task};
-
 static absolutetime_t yellow_task(void *payload)
 {
    LED_YELLOW_set_level(LED_OFF);
+   ledHeld = false;
    return 0;
 }
 
@@ -69,14 +82,77 @@ static absolutetime_t red_task(void *payload)
 	return 0;	
 }
 
+static absolutetime_t softAp_task(void *payload)
+{
+    LED_BLUE_toggle_level();
+    return LED_ON_INTERVAL;
+}
+
+static absolutetime_t defaultCredentials_task(void *payload)
+{
+    LED_GREEN_toggle_level();
+    return LED_ON_INTERVAL;
+}
+
 void LED_flashYellow(void)
 {
-   LED_YELLOW_set_level(LED_ON);
-   scheduler_timeout_create(&yellow_timer,200);
+    if (ledHeld == false)
+    {
+        LED_YELLOW_set_level(LED_ON);
+        scheduler_timeout_create(&yellow_timer,200);
+    }
+
+}
+
+void LED_holdYellowOn(bool holdHigh)
+{
+    if (holdHigh == true)
+    {
+        LED_YELLOW_set_level(LED_ON);
+    }
+    else
+    {
+        LED_YELLOW_set_level(LED_OFF);
+    }
+    // Re-Use yellow_timer task
+    ledHeld = true;
+    scheduler_timeout_create(&yellow_timer,LEDS_HOLD_INTERVAL);
 }
 
 void LED_flashRed(void)
 {
    LED_RED_set_level(LED_ON);
-   scheduler_timeout_create(&red_timer,200);	
+   scheduler_timeout_create(&red_timer,LED_ON_INTERVAL);	
+}
+
+void LED_blinkingBlue(bool amBlinking)
+{
+    if (amBlinking == true)
+    {
+        scheduler_timeout_create(&softAP_timer,LED_ON_INTERVAL);
+    }
+    else
+    {
+        scheduler_timeout_delete(&softAP_timer);
+    }
+}
+
+void LED_startBlinkingGreen(void)
+{
+    scheduler_timeout_create(&defaultCredentials_timer,LED_ON_INTERVAL);
+    ledForDefaultCredentials = true;
+}
+
+void LED_stopBlinkingGreen(void)
+{
+    if (ledForDefaultCredentials == true)
+    {
+        scheduler_timeout_delete(&defaultCredentials_timer);
+        ledForDefaultCredentials = false;
+    }
+}
+
+bool LED_isBlinkingGreen (void)
+{
+    return ledForDefaultCredentials;
 }

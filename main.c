@@ -82,15 +82,25 @@ void SERVO_set(uint8_t servo, int8_t pos) {
         PWM2_SetDutyValue(center + pos * gain);
 }
 
+#define FONT_SIZE   10 // char + count + 8 vectors
 static uint8_t steps = 0;
 static uint8_t sequence = 0;
-#define FONT_SIZE   8
+static char Msg[80];
+static char *pMsg = NULL;
 
 uint8_t font[] = {
+// step encoding f yyy xxxx
+//               7 654 3210 bit
+//  f = fire, x,y = coordinates
 //  steps    0     1     2     3     4     5     6
-       5, 0x02, 0x80, 0x84, 0xA4,    0,    0,    0,   // 'C'
-       5, 0x84, 0xC4, 0xC0, 0x80,    0,    0,    0,   // 'O'
-       6, 0x40, 0x80, 0xA2, 0x84, 0xC4,    0,    0    // 'M'
+       'C', 5, 0x04, 0x80, 0x84, 0xC4,    0,    0,    0,   0,
+       'M', 6, 0x40, 0x80, 0xA2, 0x84, 0xC4,    0,    0,   0,
+       'O', 5, 0x84, 0xC4, 0xC0, 0x80,    0,    0,    0,   0,
+       'U', 4, 0xC0, 0xC4, 0x84,    0,    0,    0,    0,   0,
+       'S', 7, 0x04, 0x80, 0xA0, 0xA4, 0xC4, 0xC0,    0,   0,
+       'E', 8, 0x04, 0x80, 0xA0, 0xA2, 0xA0, 0xC0, 0xC4,   0,
+       'R', 8, 0x40, 0x80, 0x84, 0xA4, 0xA0, 0xA2, 0xC4,   0,
+       '\0' // end
 };
 
 void fire(bool x)
@@ -106,21 +116,14 @@ void stroke(uint8_t c)
     SERVO_set(0, (x<<3)-40); SERVO_set(1, -(y<<3));
 }
 
-void draw(uint8_t c)
+void sequence_set(char c)
 {
-    uint8_t i;
-    for( i=0; i<4; i++){
-        stroke(font[c*4+i]);
-        _delay_ms(70);
+    uint8_t index = 0;
+    while ((font[index] != c) && (font[index]!= '\0') ) {
+        index += FONT_SIZE;
     }
-    fire(false);
-}
-
-void sequence_set(uint8_t seq)
-{
-    uint8_t index = seq * FONT_SIZE;
-    steps = font[index];
-    sequence = index+1;
+    steps = font[index+1];
+    sequence = index+2;
 }
 
 void sequence_step(void)
@@ -128,6 +131,11 @@ void sequence_step(void)
     if (steps) {
         stroke(font[sequence++]);
         steps--;
+        if (steps == 0) { // advance to next char in Msg string
+            uint8_t c = *pMsg++;
+            if (c)
+                sequence_set(c);
+        }
     }
 }
 
@@ -149,9 +157,12 @@ void receivedFromCloud(uint8_t *topic, uint8_t *payload)
         PORTD_set_pin_level(4, (fire == 1));
 
     uint8_t *p = JSON_getValue(payload, "text1");
-    if (p) {
-        if (strstr((char*)p, "O")) sequence_set(1);
-        if (strstr((char*)p, "M")) sequence_set(2);
+    if (*p++ == '"') { // must be a string
+        char c, *sMsg = &Msg[0];
+        while((c = *p++) != '"')    // copy until end of string (")
+            *sMsg++ = c;
+        pMsg = &Msg[0]; // reset the string pointer
+        sequence_set(*pMsg++);
     }
 }
 

@@ -24,7 +24,6 @@
     OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS
     SOFTWARE.
 */
-
 #include <stdio.h>
 #include "../../config/cryptoauthlib_config.h"
 #include "../../cryptoauthlib/lib/jwt/atca_jwt.h"
@@ -154,6 +153,7 @@ uint8_t CRYPTO_CLIENT_printPublicKey(char *s)
 uint8_t CRYPTO_CLIENT_printSerialNumber(char *s)
 {
     ATCA_STATUS status = ATCA_SUCCESS;
+	uint8_t i = 0;
 
     int retVal = atcab_init(&cfg_ateccx08a_i2c_custom);
 
@@ -166,7 +166,7 @@ uint8_t CRYPTO_CLIENT_printSerialNumber(char *s)
 
     if (status == ATCA_SUCCESS)
     {
-        for (uint8_t i = 0; i < ATCA_SERIAL_NUM_SIZE; i++)
+        for (i = 0; i < ATCA_SERIAL_NUM_SIZE; i++)
         {
             sprintf(s, "%02X", g_serial_number[i]);
             s += 2;

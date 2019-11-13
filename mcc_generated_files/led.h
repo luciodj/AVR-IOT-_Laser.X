@@ -29,12 +29,18 @@
 #ifndef LED_H_
 #define LED_H_
 #include <stdint.h>
+#include <stdbool.h>
 
 #define LED_ON				false
 #define LED_OFF				true
 
 void LED_test(void);
 void LED_flashYellow(void);
+void LED_holdYellowOn(bool holdHigh);
 void LED_flashRed(void);
+void LED_blinkingBlue(bool amBlinking);
+void LED_startBlinkingGreen(void);
+void LED_stopBlinkingGreen(void);
+bool LED_isBlinkingGreen (void);
 
 #endif /* LED_H_ */

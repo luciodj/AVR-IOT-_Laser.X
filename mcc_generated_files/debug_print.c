@@ -53,7 +53,6 @@ void debug_init(const char *prefix)
 { 
    debug_setPrefix(prefix);
    debug_setSeverity(SEVERITY_NONE);
-//   debug_printer(SEVERITY_NONE, LEVEL_NORMAL, CSI_CLS CSI_HOME BANNER CSI_RESET "\r\n\r\n" __DATE__ " " __TIME__ "\r\n");
 }
 
 void debug_setSeverity(debug_severity_t debug_level)

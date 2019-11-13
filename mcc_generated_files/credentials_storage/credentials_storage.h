@@ -35,9 +35,6 @@ extern char ssid[MAX_WIFI_CREDENTIALS_LENGTH];
 extern char pass[MAX_WIFI_CREDENTIALS_LENGTH];
 extern char authType[2];
 
-void CREDENTIALS_STORAGE_read(char *ssidbuf, char *passwordbuf, char *sec);
-void CREDENTIALS_STORAGE_save(char *ssidbuf, char *passwordbuf, char *sec);
-uint8_t CREDENTIALS_STORAGE_getDebugSeverity(void);
-void CREDENTIALS_STORAGE_setDebugSeverity(uint8_t s);
+void CREDENTIALS_STORAGE_clearWifiCredentials(void);
 
 #endif /* CREDENTIALS_STORAGE_H */

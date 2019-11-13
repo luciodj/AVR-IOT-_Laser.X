@@ -28,28 +28,34 @@ SOFTWARE.
 #include <string.h>
 #include <time.h>
 #include <stdio.h>
-#include <avr/wdt.h>
-
 #include "utils/atomic.h"
+#include <avr/wdt.h>
 #include "application_manager.h"
 #include "mcc.h"
 #include "include/pin_manager.h"
 #include "config/IoT_Sensor_Node_config.h"
 #include "config/conf_winc.h"
 #include "cloud/cloud_service.h"
-#include "cloud/wifi_service.h"
 #include "cloud/crypto_client/cryptoauthlib_main.h"
 #include "cloud/crypto_client/crypto_client.h"
+#include "cloud/wifi_service.h"
+#if CFG_ENABLE_CLI
 #include "cli/cli.h"
+#endif
 #include "credentials_storage/credentials_storage.h"
 #include "led.h"
 #include "debug_print.h"
 
-#define MAIN_DATATASK_INTERVAL 100
+#define MAIN_DATATASK_INTERVAL 100L
+// The debounce time is currently close to 2 Seconds.
+#define SW_DEBOUNCE_INTERVAL   1460000L
+
+#define SW0_TOGGLE_STATE	   SW0_get_level()
+#define SW1_TOGGLE_STATE	   SW1_get_level()
 
 // This will contain the device ID, before we have it this dummy value is the init value which is non-0
 char attDeviceID[20] = "BAAAAADD1DBAAADD1D";
-struct shared_networking_params shared_networking_params;
+shared_networking_params_t shared_networking_params;
 ATCA_STATUS retValCryptoClientSerialNumber;
 
 absolutetime_t MAIN_dataTask(void *payload);
@@ -58,20 +64,23 @@ timer_struct_t MAIN_dataTasksTimer = {MAIN_dataTask};
 void  wifiConnectionStateChanged(uint8_t status);
 
 void application_init(){
+	uint8_t mode = WIFI_DEFAULT;
+	uint32_t sw0CurrentVal = 0;
+	uint32_t sw1CurrentVal = 0;
+	uint32_t i = 0;
+	
    wdt_disable();
       
    // Initialization of modules before interrupts are enabled
    SYSTEM_Initialize();
 
    LED_test();
-   
+#if CFG_ENABLE_CLI     
    CLI_init();
    CLI_setdeviceId(attDeviceID);
-   debug_init(attDeviceID);
-   // Default not to EEPROM value but to NONE
-   // debug_setSeverity(CREDENTIALS_STORAGE_getDebugSeverity());
-   // debug_setSeverity(SEVERITY_DEBUG); // Use this to start up in debug mode always, TODO: Do this via define we can pass in without modifying the code!
-      
+#endif   
+   debug_init(attDeviceID);   
+
    ENABLE_INTERRUPTS();
    
    // Initialization of modules where the init needs interrupts to be enabled
@@ -81,16 +90,6 @@ void application_init(){
    {
       debug_printError("APP: CryptoAuthInit failed");
    }
-   CREDENTIALS_STORAGE_read(ssid, pass, authType);
-   
-   // If the EEPROM is blank we use the default credentials
-   if (ssid[0] ==  0xFF)
-   {
-      strcpy(ssid, CFG_MAIN_WLAN_SSID);
-      strcpy(pass, CFG_MAIN_WLAN_PSK);
-      itoa(CFG_MAIN_WLAN_AUTH, (char*)authType, 10);
-   }
-   
    // Get serial number from the ECC608 chip 
    retValCryptoClientSerialNumber = CRYPTO_CLIENT_printSerialNumber(attDeviceID);
    if( retValCryptoClientSerialNumber != ATCA_SUCCESS )
@@ -108,19 +107,45 @@ void application_init(){
       }
        
    }
+#if CFG_ENABLE_CLI   
    CLI_setdeviceId(attDeviceID);
+#endif   
    debug_setPrefix(attDeviceID);
    
-   uint8_t mode = SW0_get_level();
-   
+   // Blocking debounce
+   for(i = 0; i < SW_DEBOUNCE_INTERVAL; i++)
+   {
+	   sw0CurrentVal += SW0_TOGGLE_STATE;
+	   sw1CurrentVal += SW1_TOGGLE_STATE;
+   }
+   if(sw0CurrentVal < (SW_DEBOUNCE_INTERVAL/2))
+   {
+	   if(sw1CurrentVal < (SW_DEBOUNCE_INTERVAL/2))
+	   {
+		   strcpy(ssid, CFG_MAIN_WLAN_SSID);
+		   strcpy(pass, CFG_MAIN_WLAN_PSK);
+		   sprintf((char*)authType, "%d", CFG_MAIN_WLAN_AUTH);
+           LED_startBlinkingGreen();
+	   }
+	   else
+	   {
+		   mode = WIFI_SOFT_AP;
+	   }
+   }
    wifi_init(wifiConnectionStateChanged, mode);
    
-   if (mode >0) {
+   if (mode == WIFI_DEFAULT) {
       CLOUD_init(attDeviceID);
       scheduler_timeout_create(&MAIN_dataTasksTimer, MAIN_DATATASK_INTERVAL);
    }
    
    LED_test();
+}
+
+void application_post_provisioning(void)
+{
+	CLOUD_init(attDeviceID);
+	scheduler_timeout_create(&MAIN_dataTasksTimer, MAIN_DATATASK_INTERVAL);
 }
 
 
@@ -170,23 +195,12 @@ absolutetime_t MAIN_dataTask(void *payload)
       }
    } 
 
-   // Example of how to read the SW0 and SW1 buttons
-   // Check if the disconnect button was pressed
-   if (SW0_get_level() == 0)
-   {
-      CLOUD_disconnect();
-   }
-   
-   if (SW1_get_level() == 0)
-   {
-      shared_networking_params.haveAPConnection = 1;
-   }
-   
-
    LED_BLUE_set_level(!shared_networking_params.haveAPConnection);
    LED_RED_set_level(!shared_networking_params.haveERROR);
-   LED_GREEN_set_level(!CLOUD_isConnected());
-   
+   if (LED_isBlinkingGreen() == false)
+   {
+        LED_GREEN_set_level(!CLOUD_isConnected());    
+   }
    
    // This is milliseconds managed by the RTC and the scheduler, this return makes the
    //      timer run another time, returning 0 will make it stop
