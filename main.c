@@ -28,13 +28,17 @@ SOFTWARE.
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "mcc_generated_files/config/clock_config.h"
+#include <util/delay.h>
 #include "mcc_generated_files/application_manager.h"
 #include "mcc_generated_files/led.h"
 #include "mcc_generated_files/sensors_handling.h"
 #include "mcc_generated_files/cloud/cloud_service.h"
 #include "mcc_generated_files/debug_print.h"
 #include "mcc_generated_files/include/port.h"
+
 #include "json.h"
+
 
 void SERVO_initialize(void){
     TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV8_gc /* Clock Selection: System Clock / 64 */
@@ -78,6 +82,55 @@ void SERVO_set(uint8_t servo, int8_t pos) {
         PWM2_SetDutyValue(center + pos * gain);
 }
 
+static uint8_t steps = 0;
+static uint8_t sequence = 0;
+#define FONT_SIZE   8
+
+uint8_t font[] = {
+//  steps    0     1     2     3     4     5     6
+       5, 0x02, 0x80, 0x84, 0xA4,    0,    0,    0,   // 'C'
+       5, 0x84, 0xC4, 0xC0, 0x80,    0,    0,    0,   // 'O'
+       6, 0x40, 0x80, 0xA2, 0x84, 0xC4,    0,    0    // 'M'
+};
+
+void fire(bool x)
+{
+    PORTD_set_pin_level(4, x);
+}
+
+void stroke(uint8_t c)
+{
+    uint8_t x = (c>>4) & 0x7;
+    uint8_t y = c & 0xf;
+    fire(c & 0x80);
+    SERVO_set(0, (x<<3)-40); SERVO_set(1, -(y<<3));
+}
+
+void draw(uint8_t c)
+{
+    uint8_t i;
+    for( i=0; i<4; i++){
+        stroke(font[c*4+i]);
+        _delay_ms(70);
+    }
+    fire(false);
+}
+
+void sequence_set(uint8_t seq)
+{
+    uint8_t index = seq * FONT_SIZE;
+    steps = font[index];
+    sequence = index+1;
+}
+
+void sequence_step(void)
+{
+    if (steps) {
+        stroke(font[sequence++]);
+        steps--;
+    }
+}
+
 //This handles messages published from the MQTT server when subscribed
 void receivedFromCloud(uint8_t *topic, uint8_t *payload)
 {
@@ -91,37 +144,51 @@ void receivedFromCloud(uint8_t *topic, uint8_t *payload)
     if (JSON_getInt(payload, "tilt", &tilt)) {
         SERVO_set(0, tilt -19);
     }
-    PORTD_set_pin_dir(4, PORT_DIR_OUT);
+
     if (JSON_getInt(payload, "fire", &fire))
         PORTD_set_pin_level(4, (fire == 1));
+
+    uint8_t *p = JSON_getValue(payload, "text1");
+    if (p) {
+        if (strstr((char*)p, "O")) sequence_set(1);
+        if (strstr((char*)p, "M")) sequence_set(2);
+    }
 }
 
-// This will get called every 1 second only while we have a valid Cloud connection
+// This will get called every CFG_SEND_INTERVAL second only while we have a valid Cloud connection
 void sendToCloud(void)
 {
-   static char json[70];
+    static char json[70];
 
-   // This part runs every CFG_SEND_INTERVAL seconds
-   int rawTemperature = SENSORS_getTempValue();
-   int light = SENSORS_getLightValue();
-   int len = sprintf(json, "{\"Light\":%d,\"Temp\":%d}", light,rawTemperature/100);
+    int rawTemperature = SENSORS_getTempValue();
+    int light = SENSORS_getLightValue();
+    int len = sprintf(json, "{\"Light\":%d,\"Temp\":%d}", light,rawTemperature/100);
 
-   if (len >0) {
-      CLOUD_publishData((uint8_t*)json, len);
-   }
+    if (len >0) {
+        CLOUD_publishData((uint8_t*)json, len);
+    }
 
-   LED_flashYellow();
+    LED_flashYellow();
 }
 
 
 int main(void)
 {
+    uint8_t count = 0;
     application_init();
     SERVO_initialize();
+    // enable laser output control pin
+    PORTD_set_pin_dir(4, PORT_DIR_OUT);
+
 
     while (1)
     {
-       runScheduler();
+        runScheduler();
+        if (TCA0.SINGLE.INTFLAGS & 1) { // check TCA0 period OVF
+            TCA0.SINGLE.INTFLAGS = 1;   // clear interrupt
+            if ((count++ & 0xf) == 0)
+                sequence_step();
+       }
     }
 
     return 0;
