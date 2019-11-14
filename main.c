@@ -83,24 +83,29 @@ void SERVO_set(uint8_t servo, int8_t pos) {
 }
 
 #define FONT_SIZE   10 // char + count + 8 vectors
+#define SCALE       8 //
 static uint8_t steps = 0;
 static uint8_t sequence = 0;
 static char Msg[80];
 static char *pMsg = NULL;
 
-uint8_t font[] = {
+const uint8_t font[] = {
 // step encoding f yyy xxxx
 //               7 654 3210 bit
 //  f = fire, x,y = coordinates
 //  steps    0     1     2     3     4     5     6
-       'C', 5, 0x04, 0x80, 0x84, 0xC4,    0,    0,    0,   0,
+       'C', 5, 0x04, 0x80, 0xC0, 0xC4,    0,    0,    0,   0,
        'M', 6, 0x40, 0x80, 0xA2, 0x84, 0xC4,    0,    0,   0,
+       'H', 6, 0xC0, 0xA0, 0xA4, 0x84, 0xC4,    0,    0,   0,
        'O', 5, 0x84, 0xC4, 0xC0, 0x80,    0,    0,    0,   0,
+       'D', 6, 0x83, 0XB4, 0xC4, 0xC0, 0x80,    0,    0,   0,
        'U', 4, 0xC0, 0xC4, 0x84,    0,    0,    0,    0,   0,
+       'I', 4, 0x02, 0xC2, 0X82,    0,    0,    0,    0,   0,
        'S', 7, 0x04, 0x80, 0xA0, 0xA4, 0xC4, 0xC0,    0,   0,
        'E', 8, 0x04, 0x80, 0xA0, 0xA2, 0xA0, 0xC0, 0xC4,   0,
        'R', 8, 0x40, 0x80, 0x84, 0xA4, 0xA0, 0xA2, 0xC4,   0,
-       '\0' // end
+       'P', 8, 0x40, 0x80, 0x84, 0xA4, 0xA0,    0,    0,   0,
+       '\0', '\0', '\0' // end
 };
 
 void fire(bool x)
@@ -113,7 +118,7 @@ void stroke(uint8_t c)
     uint8_t x = (c>>4) & 0x7;
     uint8_t y = c & 0xf;
     fire(c & 0x80);
-    SERVO_set(0, (x<<3)-40); SERVO_set(1, -(y<<3));
+    SERVO_set(0, (x*SCALE)-40); SERVO_set(1, -(y*SCALE));
 }
 
 void sequence_set(char c)
@@ -161,6 +166,7 @@ void receivedFromCloud(uint8_t *topic, uint8_t *payload)
         char c, *sMsg = &Msg[0];
         while((c = *p++) != '"')    // copy until end of string (")
             *sMsg++ = c;
+        *sMsg = '\0';
         pMsg = &Msg[0]; // reset the string pointer
         sequence_set(*pMsg++);
     }
@@ -191,13 +197,12 @@ int main(void)
     // enable laser output control pin
     PORTD_set_pin_dir(4, PORT_DIR_OUT);
 
-
     while (1)
     {
         runScheduler();
         if (TCA0.SINGLE.INTFLAGS & 1) { // check TCA0 period OVF
             TCA0.SINGLE.INTFLAGS = 1;   // clear interrupt
-            if ((count++ & 0xf) == 0)
+            if ((count++ & 0xF) == 0)
                 sequence_step();
        }
     }
